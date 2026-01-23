@@ -1356,73 +1356,73 @@
                 const res = await fetch(`${apiUrl}/models`, { method: 'GET', headers: { 'Authorization': `Bearer ${apiKey}` } });
                 if(!res.ok) throw new Error("Fetch failed: " + res.status);
                 const data = await res.json();
-const entry = { title, content, scope, target: scope==='local' ? targets : null };
-if(wbEditIndex === -1) worldBook.push(entry); else worldBook[wbEditIndex] = entry;
-saveData(); renderWorldBook(); closeModal('wb-modal');
-function renderWorldBook() {
-const list = document.getElementById('world-book-list'); list.innerHTML = '';
-worldBook.forEach((entry, index) => {
-const div = document.createElement('div'); div.className = 'lore-entry';
+                if(data.data && Array.isArray(data.data)) {
+                    const select = document.getElementById('global-model-select'); select.innerHTML = '';
+                    data.data.sort((a,b) => a.id.localeCompare(b.id));
+                    data.data.forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.innerText = m.id; select.appendChild(opt); });
+                    alert(`Found ${data.data.length} models.`);
+                } else throw new Error("Invalid format");
+            } catch(e) { alert("Error fetching models: " + e.message); } finally { btn.className = "fas fa-sync-alt"; }
         }
-const tagClass = entry.scope === 'global' ? 'tag-global' : 'tag-local';
-let targetText = ''; if(entry.scope === 'local') { const t = Array.isArray(entry.target) ? entry.target.join(", ") : entry.target; targetText = `<div class="lore-target">Bound to: ${t}</div>`; }
-div.innerHTML = `<div class="lore-header"><h3 class="lore-title">${escapeHtml(entry.title)}</h3><span class="lore-scope-tag ${tagClass}">${entry.scope.toUpperCase()}</span></div><p class="lore-content">${escapeHtml(entry.content)}</p>${targetText}<div class="lore-actions"><button class="icon-btn" onclick="editLore(${index})"><i class="fas fa-pen-nib"></i></button><button class="icon-btn" onclick="deleteLore(${index})"><i class="fas fa-trash"></i></button></div>`;
-function editLore(index) {
-wbEditIndex = index; const entry = worldBook[index];
-document.getElementById('wb-title').value = entry.title; document.getElementById('wb-content').value = entry.content;
-const targets = Array.isArray(entry.target) ? entry.target : (entry.target ? [entry.target] : []);
-const radios = document.getElementsByName('scope'); for(let r of radios) { if(r.value === entry.scope) r.checked = true; }
-toggleWbScope(); document.getElementById('wb-modal').style.display = 'flex';
-function deleteLore(index) { if(confirm("Burn page?")) { worldBook.splice(index, 1); saveData(); renderWorldBook(); } }
+        function renderWbTargetCheckboxes(selectedTargets = []) {
+            if(!Array.isArray(selectedTargets)) selectedTargets = [selectedTargets];
+            const container = document.getElementById('wb-target-list'); container.innerHTML = '';
+            if(contacts.length === 0) { container.innerHTML = '<div style="color:#666; padding:5px; font-size:12px;">No souls available.</div>'; return; }
+            contacts.forEach(c => { 
+                const div = document.createElement('div'); div.className = 'wb-checkbox-item';
+                const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.value = c.name; checkbox.id = `wb-chk-${c.id}`;
+                if(selectedTargets.includes(c.name)) checkbox.checked = true;
+                const label = document.createElement('label'); label.htmlFor = `wb-chk-${c.id}`; label.innerText = c.name;
+                div.appendChild(checkbox); div.appendChild(label); container.appendChild(div);
             });
         }
-function updateClock() {
-const now=new Date（）；//当前日期和时间对象
+        function openWorldBookModal() {
+            wbEditIndex = -1; document.getElementById('wb-modal-title').innerText = "Inscribe New Lore";
             document.getElementById('wb-title').value = ''; document.getElementById('wb-content').value = '';
             renderWbTargetCheckboxes([]);
             document.querySelector('input[name="scope"][value="global"]').checked = true; toggleWbScope();
             document.getElementById('wb-modal').style.display = 'flex';
         }
-if(homePrefs.background) document.getElementById('home-screen').style.backgroundImage = `url(${homePrefs.background})`;
-警报（“系统契约密封”）；
-async function fetchModels() {
-const apiUrl = document.getElementById('global-api-url').value;
-const apiKey = document.getElementById('global-api-key').value;
-const btn = document.querySelector('button[onclick="fetchModels()"] i');
-if(!apiUrl || !apiKey) { alert("Enter URL and Key first."); return; }
-btn.className = "fas fa-sync-alt fa-spin";
-尝试 {
+        function toggleWbScope() { const scope = document.querySelector('input[name="scope"]:checked').value; document.getElementById('wb-target-div').style.display = (scope === 'local') ? 'block' : 'none'; }
+        function saveWorldBookEntry() {
+            const title = document.getElementById('wb-title').value.trim(); const content = document.getElementById('wb-content').value.trim();
+            const scope = document.querySelector('input[name="scope"]:checked').value; 
+            let targets = []; const checkboxes = document.querySelectorAll('#wb-target-list input[type="checkbox"]:checked'); checkboxes.forEach(chk => targets.push(chk.value));
+            if(!title || !content) return;
+            const entry = { title, content, scope, target: scope==='local' ? targets : null };
+            if(wbEditIndex === -1) worldBook.push(entry); else worldBook[wbEditIndex] = entry;
+            saveData(); renderWorldBook(); closeModal('wb-modal');
         }
-const res = await fetch(`${apiUrl}/models`, { method: 'GET', headers: { 'Authorization': `Bearer ${apiKey}` } });
-if(!res.ok) throw new Error("Fetch failed: " + res.status);
-const data = await res.json();
-if(data.data && Array.isArray(data.data)) {
-const select = document.getElementById('global-model-select'); select.innerHTML = '';
-data.data.sort((a,b) => a.id.localeCompare(b.id));
-data.data.forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.innerText = m.id; select.appendChild(opt); });
+        function renderWorldBook() {
+            const list = document.getElementById('world-book-list'); list.innerHTML = '';
+            worldBook.forEach((entry, index) => {
+                const div = document.createElement('div'); div.className = 'lore-entry';
+                const tagClass = entry.scope === 'global' ? 'tag-global' : 'tag-local';
+                let targetText = ''; if(entry.scope === 'local') { const t = Array.isArray(entry.target) ? entry.target.join(", ") : entry.target; targetText = `<div class="lore-target">Bound to: ${t}</div>`; }
+                div.innerHTML = `<div class="lore-header"><h3 class="lore-title">${escapeHtml(entry.title)}</h3><span class="lore-scope-tag ${tagClass}">${entry.scope.toUpperCase()}</span></div><p class="lore-content">${escapeHtml(entry.content)}</p>${targetText}<div class="lore-actions"><button class="icon-btn" onclick="editLore(${index})"><i class="fas fa-pen-nib"></i></button><button class="icon-btn" onclick="deleteLore(${index})"><i class="fas fa-trash"></i></button></div>`;
                 list.appendChild(div);
             });
         }
-alert(`Found ${data.data.length} models.`);
-} else throw new Error("Invalid format");
-} catch(e) { alert("Error fetching models: " + e.message); } finally { btn.className = "fas fa-sync-alt"; }
-function renderWbTargetCheckboxes(selectedTargets = []) {
+        function editLore(index) {
+            wbEditIndex = index; const entry = worldBook[index];
+            document.getElementById('wb-title').value = entry.title; document.getElementById('wb-content').value = entry.content;
+            const targets = Array.isArray(entry.target) ? entry.target : (entry.target ? [entry.target] : []);
             renderWbTargetCheckboxes(targets);
-if(!Array.isArray(selectedTargets)) selectedTargets = [selectedTargets];
-const container = document.getElementById('wb-target-list'); container.innerHTML = '';
+            const radios = document.getElementsByName('scope'); for(let r of radios) { if(r.value === entry.scope) r.checked = true; }
+            toggleWbScope(); document.getElementById('wb-modal').style.display = 'flex';
         }
-if(contacts.length === 0) { container.innerHTML = '<div style="color:#666; padding:5px; font-size:12px;">No souls available.</div>'; return; }
-contacts.forEach(c => {
-const div = document.createElement('div'); div.className = 'wb-checkbox-item';
-const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.value = c.name; checkbox.id = `wb-chk-${c.id}`;
-if(selectedTargets.includes(c.name)) checkbox.checked = true;
-const label = document.createElement('label'); label.htmlFor = `wb-chk-${c.id}`; label.innerText = c.name;
-div.appendChild（复选框）；div.appendChild（标签）；container.appendChild（div）；
+        function deleteLore(index) { if(confirm("Burn page?")) { worldBook.splice(index, 1); saveData(); renderWorldBook(); } }
+        function updateClock() { 
+            const now = new Date(); 
+            const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+            document.getElementById('clock').innerText = timeStr; 
+            const widget = document.getElementById('home-widget-clock');
+            if(widget) widget.innerText = timeStr;
         }
-function openWorldBookModal() {
+        function toggleFullScreenMode() {
             document.body.classList.toggle('full-screen-mode');
         }
-wbEditIndex = -1; document.getElementById('wb-modal-title').innerText = "Inscribe New Lore";
+        function escapeHtml(text) { if(!text) return ''; return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
     </script>
 </body>
 </html>

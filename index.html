@@ -52,7 +52,6 @@
         }
         body.full-screen-mode .screen { border-radius: 0; }
         body.full-screen-mode .status-bar { display: none !important; }
-        /* Fix layout when status bar is hidden */
         body.full-screen-mode .app-view { top: 0 !important; height: 100% !important; }
         body.full-screen-mode #home-screen { padding-top: 40px !important; }
 
@@ -78,33 +77,28 @@
         }
 
         /* --- STATUS BAR LOGIC --- */
-        
-        /* Default: Solid/Relative for APPS (Chat, Settings, etc.) */
         .status-bar {
             height: 30px; 
             display: flex; justify-content: space-between; padding: 5px 20px;
             font-size: 14px; align-items: center; 
             background: #0a0202; /* Solid dark background for apps */
             z-index: 100; flex-shrink: 0;
-            position: relative; /* Sits in flow, pushing app content down */
+            position: relative; 
             box-sizing: border-box;
             border-bottom: 1px solid #1a0505;
         }
 
-        /* Special: Transparent/Absolute ONLY for HOME SCREEN */
         .screen.home-active .status-bar {
-            position: absolute; /* Float over wallpaper */
+            position: absolute; 
             top: 0; left: 0; width: 100%;
-            background: transparent; /* See-through */
+            background: transparent; 
             border-bottom: none;
         }
-
-        /* --- LAYOUTS --- */
 
         /* Apps */
         .app-view {
             position: absolute; 
-            top: 30px; /* Start BELOW status bar by default */
+            top: 30px; 
             bottom: 0; left: 0; width: 100%;
             background-color: var(--screen-bg); z-index: 10;
             display: none; flex-direction: column; box-sizing: border-box;
@@ -112,7 +106,6 @@
             background-size: cover; background-position: center; background-repeat: no-repeat;
         }
         .app-view.active { display: flex; }
-        
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .app-header {
@@ -123,26 +116,7 @@
             flex-shrink: 0; position: relative;
         }
 
-        /* Home Screen */
-        #home-screen {
-            position: absolute; 
-            top: 0; 
-            bottom: 0; width: 100%;
-            display: flex; flex-direction: column;
-            /* Padding top accounts for the absolute status bar in Home mode */
-            padding: 40px 20px 20px 20px; 
-            box-sizing: border-box; overflow-y: auto;
-            align-items: center;
-            background-size: cover; background-position: center;
-        }
-
-        /* Rest of the CSS remains exactly the same... */
-        /* Smaller Chat Title */
-        #chat-title-name {
-            font-size: 18px; 
-            font-family: 'MedievalSharp', cursive;
-            letter-spacing: 1px;
-        }
+        #chat-title-name { font-size: 18px; font-family: 'MedievalSharp', cursive; letter-spacing: 1px; }
         
         .header-btn {
             position: absolute; background: none; border: 1px solid var(--primary-gold);
@@ -155,38 +129,41 @@
         .app-content { flex: 1; overflow-y: auto; padding: 15px; position: relative; min-height: 0; padding-bottom: 20px; }
         .app-content::-webkit-scrollbar { width: 6px; }
         .app-content::-webkit-scrollbar-thumb { background: var(--blood-red); border-radius: 3px; }
+
+        /* Home Screen */
+        #home-screen {
+            position: absolute; top: 0; bottom: 0; width: 100%;
+            display: flex; flex-direction: column;
+            padding: 40px 20px 20px 20px; 
+            box-sizing: border-box; overflow-y: auto;
+            align-items: center;
+            background-size: cover; background-position: center;
+        }
         
-        /* Home Widget Styles */
+        /* Home Widgets */
         #home-widget-container {
             width: 100%; display: flex; flex-direction: column; align-items: center;
             margin-bottom: 40px; text-align: center; z-index: 5;
             text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
-        #home-widget-clock {
-            font-family: 'UnifrakturMaguntia', cursive; font-size: 64px; color: var(--primary-gold);
-            margin-bottom: 10px; line-height: 1;
-        }
-        .home-avatar-container {
-            width: 100px; height: 100px; position: relative; margin-bottom: 15px;
-        }
+        #home-widget-clock { font-family: 'UnifrakturMaguntia', cursive; font-size: 64px; color: var(--primary-gold); margin-bottom: 10px; line-height: 1; }
+        .home-avatar-container { width: 100px; height: 100px; position: relative; margin-bottom: 15px; }
         #home-widget-avatar {
             width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--blood-red);
             object-fit: cover; cursor: pointer; background: #000;
             box-shadow: 0 0 20px rgba(0,0,0,0.8); transition: transform 0.2s;
         }
         #home-widget-avatar:hover { transform: scale(1.05); border-color: var(--primary-gold); }
-        
         #home-widget-signature {
-            font-size: 14px; color: #ccc; font-style: italic; max-width: 90%;
-            cursor: pointer; padding: 5px 10px; border-radius: 5px;
-            background: transparent; 
-            text-shadow: 0 0 5px #000;
+            font-size: 14px; color: #ccc; font-style: italic; max-width: 90%; cursor: pointer; padding: 5px 10px; border-radius: 5px;
+            background: transparent; text-shadow: 0 0 5px #000;
         }
         #home-widget-signature:hover { color: var(--primary-gold); }
 
+        /* Grid Layout for 4 Apps */
         #home-apps-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
-            width: 100%; justify-items: center; z-index: 5;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; /* 2 columns for 4 apps */
+            width: 80%; justify-items: center; z-index: 5;
         }
 
         .app-icon { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.2s; }
@@ -251,105 +228,52 @@
             flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative;
             background: rgba(10, 2, 2, 0.7); 
         }
-        .chat-history { 
-            flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; 
-        }
-        .chat-input-area { 
-            display: flex; flex-direction: column;
-            border-top: 1px solid #333; background: #0a0202; flex-shrink: 0; padding-bottom: 15px;
-        }
-        .input-toolbar {
-            display: none; align-items: center; justify-content: space-between;
-            padding: 5px 10px; background: #1a0505; border-bottom: 1px solid #333;
-            font-size: 12px; color: #aaa;
-        }
-        .quote-preview-text {
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 85%;
-            font-style: italic; color: var(--primary-gold);
-        }
+        .chat-history { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .chat-input-area { display: flex; flex-direction: column; border-top: 1px solid #333; background: #0a0202; flex-shrink: 0; padding-bottom: 15px; }
+        .input-toolbar { display: none; align-items: center; justify-content: space-between; padding: 5px 10px; background: #1a0505; border-bottom: 1px solid #333; font-size: 12px; color: #aaa; }
+        .quote-preview-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 85%; font-style: italic; color: var(--primary-gold); }
         .input-row { display: flex; padding: 10px; }
 
-        /* Selection Mode Bar */
-        #multi-select-bar {
-            display: none; padding: 10px; background: #111; border-top: 2px solid var(--blood-red);
-            justify-content: space-between; align-items: center;
-        }
+        /* Multi-select */
+        #multi-select-bar { display: none; padding: 10px; background: #111; border-top: 2px solid var(--blood-red); justify-content: space-between; align-items: center; }
 
         /* Chat Bubbles */
         .chat-row { display: flex; width: 100%; position: relative; }
         .chat-row.received { justify-content: flex-start; }
         .chat-row.sent { justify-content: flex-end; }
         
-        .chat-avatar-small {
-            width: 35px; height: 35px; border-radius: 50%; border: 1px solid #444;
-            object-fit: cover; flex-shrink: 0; background: #000;
-        }
+        .chat-avatar-small { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #444; object-fit: cover; flex-shrink: 0; background: #000; }
         .chat-row.received .chat-avatar-small { margin-right: 8px; border-color: var(--blood-red); }
         .chat-row.sent .chat-avatar-small { margin-left: 8px; border-color: var(--primary-gold); }
 
         .msg-bubble {
-            padding: 10px; border-radius: 8px; font-size: 14px; max-width: 70%;
-            line-height: 1.4; word-wrap: break-word; position: relative;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            transition: transform 0.1s;
+            padding: 10px; border-radius: 8px; font-size: 14px; max-width: 70%; line-height: 1.4; word-wrap: break-word; position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5); transition: transform 0.1s;
         }
-        .chat-row.received .msg-bubble {
-            background: rgba(138, 11, 11, 0.4); border-left: 3px solid var(--blood-red);
-            backdrop-filter: blur(5px);
-        }
-        .chat-row.sent .msg-bubble {
-            background: rgba(197, 160, 89, 0.3); border-right: 3px solid var(--primary-gold);
-            text-align: right; backdrop-filter: blur(5px);
-        }
+        .chat-row.received .msg-bubble { background: rgba(138, 11, 11, 0.4); border-left: 3px solid var(--blood-red); backdrop-filter: blur(5px); }
+        .chat-row.sent .msg-bubble { background: rgba(197, 160, 89, 0.3); border-right: 3px solid var(--primary-gold); text-align: right; backdrop-filter: blur(5px); }
         .msg-bubble:active { transform: scale(0.98); }
 
-        /* Quote Style Inside Bubble */
-        .quote-block {
-            background: rgba(0,0,0,0.3); border-left: 2px solid #888;
-            padding: 4px 8px; margin-bottom: 6px; font-size: 11px; color: #ccc;
-            border-radius: 4px; text-align: left;
-            white-space: pre-wrap;
-        }
-        
-        /* Recalled Message Style */
-        .msg-recalled {
-            background: rgba(50, 50, 50, 0.5) !important;
-            border-color: #555 !important;
-            color: #888; font-style: italic; cursor: pointer;
-        }
+        .quote-block { background: rgba(0,0,0,0.3); border-left: 2px solid #888; padding: 4px 8px; margin-bottom: 6px; font-size: 11px; color: #ccc; border-radius: 4px; text-align: left; white-space: pre-wrap; }
+        .msg-recalled { background: rgba(50, 50, 50, 0.5) !important; border-color: #555 !important; color: #888; font-style: italic; cursor: pointer; }
         .msg-recalled:hover { color: #fff; }
-
-        /* Multi-select Checkbox */
-        .select-checkbox {
-            display: none; width: 20px; height: 20px; border: 1px solid var(--primary-gold);
-            border-radius: 50%; margin-right: 10px; align-self: center;
-            flex-shrink: 0; justify-content: center; align-items: center;
-        }
+        .select-checkbox { display: none; width: 20px; height: 20px; border: 1px solid var(--primary-gold); border-radius: 50%; margin-right: 10px; align-self: center; flex-shrink: 0; justify-content: center; align-items: center; }
         .chat-row.selecting .select-checkbox { display: flex; }
         .chat-row.selected .select-checkbox { background: var(--blood-red); }
         .chat-row.selected .select-checkbox::after { content: '✓'; color: #000; font-size: 14px; }
-
         .msg-error { color: #ff5555; font-family: monospace; border: 1px dashed #ff5555; background: rgba(50, 0, 0, 0.8) !important; }
 
-        /* Context Menu (Bottom Sheet) */
-        .context-menu-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 2000; display: none; align-items: flex-end;
-        }
-        .context-menu {
-            width: 100%; background: #111; border-top: 2px solid var(--primary-gold);
-            border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box;
-            animation: slideUp 0.2s ease-out;
-        }
+        /* Context Menu */
+        .context-menu-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; align-items: flex-end; }
+        .context-menu { width: 100%; background: #111; border-top: 2px solid var(--primary-gold); border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; animation: slideUp 0.2s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
         .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; text-align: center; }
         .menu-item { display: flex; flex-direction: column; align-items: center; gap: 8px; color: #ccc; cursor: pointer; }
         .menu-item i { font-size: 20px; background: #222; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; border-radius: 50%; border: 1px solid #444; }
         .menu-item:hover i { background: var(--primary-gold); color: #000; }
         .menu-item span { font-size: 11px; }
 
-        /* World Book & Modals */
+        /* Common Modal Stuff */
         .lore-entry { background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 10px; margin-bottom: 10px; position: relative; padding-bottom: 35px; }
         .lore-header { display: flex; justify-content: space-between; align-items: center; }
         .lore-title { color: var(--blood-red); font-family: 'UnifrakturMaguntia', cursive; font-size: 18px; margin: 0; }
@@ -417,7 +341,7 @@
                     <div id="home-widget-signature" onclick="editHomeSignature()">我无限的爱着新的一日</div>
                 </div>
 
-                <!-- Apps -->
+                <!-- Apps Grid (2x2) -->
                 <div id="home-apps-grid">
                     <div class="app-icon" onclick="openApp('app-chat')">
                         <div class="icon-box" style="color: #c5a059;"><i class="fas fa-comment-dots"></i></div>
@@ -427,6 +351,11 @@
                         <div class="icon-box" style="color: #8a0b0b;"><i class="fas fa-book-skull"></i></div>
                         <span class="icon-label">Grimoire</span>
                     </div>
+                    <!-- NEW APP: VANITY (BEAUTIFY) -->
+                    <div class="app-icon" onclick="openApp('app-beautify')">
+                        <div class="icon-box" style="color: #bfa7cc;"><i class="fas fa-magic"></i></div>
+                        <span class="icon-label">Vanity</span>
+                    </div>
                     <div class="app-icon" onclick="openApp('app-settings')">
                         <div class="icon-box" style="color: #a0a0a0;"><i class="fas fa-cogs"></i></div>
                         <span class="icon-label">Pact</span>
@@ -434,42 +363,30 @@
                 </div>
             </div>
 
-            <!-- ================= WHISPERS (Contact List) ================= -->
+            <!-- ================= WHISPERS ================= -->
             <div id="app-chat" class="app-view">
                 <div class="app-header">
-                    <button class="header-btn btn-left" onclick="goHome()">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
+                    <button class="header-btn btn-left" onclick="goHome()"><i class="fas fa-chevron-left"></i></button>
                     Whispers
-                    <button class="header-btn btn-right" onclick="openAddContactModal()">
-                        <i class="fas fa-plus"></i>
-                    </button>
+                    <button class="header-btn btn-right" onclick="openAddContactModal()"><i class="fas fa-plus"></i></button>
                 </div>
                 <div class="app-content" id="contact-list"></div>
             </div>
 
-            <!-- ================= WHISPERS (Chat View) ================= -->
+            <!-- ================= CHAT CONVERSATION ================= -->
             <div id="app-chat-conversation" class="app-view">
                 <div class="app-header">
-                    <button class="header-btn btn-left" onclick="backToContactList()">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
+                    <button class="header-btn btn-left" onclick="backToContactList()"><i class="fas fa-chevron-left"></i></button>
                     <span id="chat-title-name">Unknown</span>
-                    <button class="header-btn btn-right" onclick="openChatSettingsModal()">
-                        <i class="fas fa-cog"></i>
-                    </button>
+                    <button class="header-btn btn-right" onclick="openChatSettingsModal()"><i class="fas fa-cog"></i></button>
                 </div>
                 <div class="chat-view-container">
                     <div class="chat-history" id="message-container"></div>
-                    
-                    <!-- Multi-select Toolbar -->
                     <div id="multi-select-bar">
                         <button class="goth-btn btn-cancel" onclick="exitSelectionMode()">Cancel</button>
                         <span style="color:#666; font-size:12px;">Select Messages</span>
                         <button class="goth-btn btn-delete" style="margin-top:0;" onclick="deleteSelectedMessages()">Delete</button>
                     </div>
-
-                    <!-- Input Area -->
                     <div class="chat-input-area" id="chat-input-wrapper">
                         <div id="quote-preview-bar" class="input-toolbar">
                             <span class="quote-preview-text" id="quote-preview-content">Replying to...</span>
@@ -483,54 +400,32 @@
                 </div>
             </div>
 
-            <!-- Context Menu for Message -->
+            <!-- ================= CONTEXT MENUS & MODALS ================= -->
             <div id="context-menu-overlay" class="context-menu-overlay" onclick="closeContextMenu()">
                 <div class="context-menu" onclick="event.stopPropagation()">
                     <div class="menu-grid">
-                        <div class="menu-item" onclick="handleMenuAction('copy')">
-                            <i class="fas fa-copy"></i>
-                            <span>Copy</span>
-                        </div>
-                        <div class="menu-item" onclick="handleMenuAction('quote')">
-                            <i class="fas fa-reply"></i>
-                            <span>Quote</span>
-                        </div>
-                        <div class="menu-item" onclick="handleMenuAction('recall')">
-                            <i class="fas fa-undo"></i>
-                            <span>Recall</span>
-                        </div>
-                        <div class="menu-item" onclick="handleMenuAction('multi')">
-                            <i class="fas fa-check-double"></i>
-                            <span>Select</span>
-                        </div>
-                        <div class="menu-item" onclick="handleMenuAction('delete')" style="color:#ff5555;">
-                            <i class="fas fa-trash" style="border-color:#ff5555;"></i>
-                            <span>Delete</span>
-                        </div>
+                        <div class="menu-item" onclick="handleMenuAction('copy')"><i class="fas fa-copy"></i><span>Copy</span></div>
+                        <div class="menu-item" onclick="handleMenuAction('quote')"><i class="fas fa-reply"></i><span>Quote</span></div>
+                        <div class="menu-item" onclick="handleMenuAction('recall')"><i class="fas fa-undo"></i><span>Recall</span></div>
+                        <div class="menu-item" onclick="handleMenuAction('multi')"><i class="fas fa-check-double"></i><span>Select</span></div>
+                        <div class="menu-item" onclick="handleMenuAction('delete')" style="color:#ff5555;"><i class="fas fa-trash" style="border-color:#ff5555;"></i><span>Delete</span></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Modals -->
             <div id="modal-add-contact" class="modal-overlay">
                 <div class="modal-box">
                     <h3 class="modal-title">Summon Entity</h3>
                     <div class="form-row">
-                        <span class="form-label">Avatar (Tap to upload)</span>
+                        <span class="form-label">Avatar</span>
                         <div class="upload-container">
                             <img id="new-contact-preview" class="avatar-preview" onclick="document.getElementById('new-contact-file').click()">
                             <input type="file" id="new-contact-file" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'new-contact-preview')">
                             <label class="upload-btn" onclick="document.getElementById('new-contact-file').click()">Select Image</label>
                         </div>
                     </div>
-                    <div class="form-row">
-                        <span class="form-label">True Name</span>
-                        <input type="text" id="new-contact-name" class="goth-input" placeholder="Name...">
-                    </div>
-                    <div class="form-row">
-                        <span class="form-label">Soul Echo (Persona)</span>
-                        <textarea id="new-contact-persona" class="goth-textarea" style="height: 100px;" placeholder="Who are they..."></textarea>
-                    </div>
+                    <div class="form-row"><span class="form-label">True Name</span><input type="text" id="new-contact-name" class="goth-input" placeholder="Name..."></div>
+                    <div class="form-row"><span class="form-label">Persona</span><textarea id="new-contact-persona" class="goth-textarea" style="height: 100px;" placeholder="Who are they..."></textarea></div>
                     <div class="modal-actions">
                         <button class="goth-btn btn-cancel" onclick="closeModal('modal-add-contact')">Cancel</button>
                         <button class="goth-btn btn-confirm" onclick="saveNewContact()">Summon</button>
@@ -538,51 +433,20 @@
                 </div>
             </div>
 
-            <!-- Modal: Chat Settings -->
             <div id="modal-chat-settings" class="modal-overlay">
                 <div class="modal-box">
                     <h3 class="modal-title">Soul Binding</h3>
                     <div style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px;">
-                        <div style="flex: 1; text-align: center;">
-                            <span class="form-label">Entity Avatar</span>
-                            <img id="setting-char-preview" class="avatar-preview" style="margin: 0 auto; display: block;" onclick="document.getElementById('setting-char-file').click()">
-                            <input type="file" id="setting-char-file" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'setting-char-preview')">
-                        </div>
-                        <div style="flex: 1; text-align: center;">
-                            <span class="form-label">User Avatar</span>
-                            <img id="setting-user-preview" class="avatar-preview" style="margin: 0 auto; display: block;" onclick="document.getElementById('setting-user-file').click()">
-                            <input type="file" id="setting-user-file" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'setting-user-preview')">
-                        </div>
+                        <div style="flex: 1; text-align: center;"><span class="form-label">Entity</span><img id="setting-char-preview" class="avatar-preview" style="margin: 0 auto; display: block;" onclick="document.getElementById('setting-char-file').click()"><input type="file" id="setting-char-file" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'setting-char-preview')"></div>
+                        <div style="flex: 1; text-align: center;"><span class="form-label">User</span><img id="setting-user-preview" class="avatar-preview" style="margin: 0 auto; display: block;" onclick="document.getElementById('setting-user-file').click()"><input type="file" id="setting-user-file" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'setting-user-preview')"></div>
                     </div>
-                    <div class="form-row">
-                        <span class="form-label">Chat Background (Tap to upload)</span>
-                        <img id="setting-bg-preview" class="bg-preview" onclick="document.getElementById('setting-bg-file').click()">
-                        <input type="file" id="setting-bg-file" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'setting-bg-preview', 800)">
-                    </div>
-                    <div class="form-row">
-                        <span class="form-label">Entity Persona</span>
-                        <textarea id="setting-char-persona" class="goth-textarea" style="height: 60px;"></textarea>
-                    </div>
-                    <div class="form-row">
-                        <span class="form-label">User Name (Your Role)</span>
-                        <input type="text" id="setting-user-name" class="goth-input" placeholder="Your Name...">
-                    </div>
-                    <div class="form-row">
-                        <span class="form-label">User Persona (Your Role)</span>
-                        <textarea id="setting-user-persona" class="goth-textarea" style="height: 50px;" placeholder="Your role..."></textarea>
-                    </div>
-                    <div class="switch-container">
-                        <span class="switch-label">Offline Mode (In-Person RP)</span>
-                        <label class="switch"><input type="checkbox" id="setting-offline-mode" onchange="toggleOfflineInput()"><span class="slider"></span></label>
-                    </div>
-                    <div id="offline-length-container" class="form-row" style="display: none; border-left: 2px solid var(--blood-red); padding-left: 10px;">
-                        <span class="form-label" style="color: var(--primary-gold);">Desired Output Length (Words, Max 5000)</span>
-                        <input type="number" id="setting-target-length" class="goth-input" placeholder="e.g. 500" max="5000">
-                    </div>
-                    <div class="form-row">
-                        <span class="form-label">Bubble Aesthetics (CSS)</span>
-                        <textarea id="setting-bubble-css" class="goth-textarea" style="height: 50px; font-size: 10px; font-family: monospace;" placeholder=".msg-bubble { ... }"></textarea>
-                    </div>
+                    <div class="form-row"><span class="form-label">Chat Background</span><img id="setting-bg-preview" class="bg-preview" onclick="document.getElementById('setting-bg-file').click()"><input type="file" id="setting-bg-file" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'setting-bg-preview', 800)"></div>
+                    <div class="form-row"><span class="form-label">Entity Persona</span><textarea id="setting-char-persona" class="goth-textarea" style="height: 60px;"></textarea></div>
+                    <div class="form-row"><span class="form-label">User Name</span><input type="text" id="setting-user-name" class="goth-input" placeholder="Your Name..."></div>
+                    <div class="form-row"><span class="form-label">User Persona</span><textarea id="setting-user-persona" class="goth-textarea" style="height: 50px;" placeholder="Your role..."></textarea></div>
+                    <div class="switch-container"><span class="switch-label">Offline Mode</span><label class="switch"><input type="checkbox" id="setting-offline-mode" onchange="toggleOfflineInput()"><span class="slider"></span></label></div>
+                    <div id="offline-length-container" class="form-row" style="display: none; border-left: 2px solid var(--blood-red); padding-left: 10px;"><span class="form-label" style="color: var(--primary-gold);">Desired Output Length</span><input type="number" id="setting-target-length" class="goth-input" placeholder="e.g. 500" max="5000"></div>
+                    <div class="form-row"><span class="form-label">Bubble CSS</span><textarea id="setting-bubble-css" class="goth-textarea" style="height: 50px; font-size: 10px; font-family: monospace;" placeholder=".msg-bubble { ... }"></textarea></div>
                     <div class="modal-actions">
                         <button class="goth-btn btn-export" onclick="exportCurrentChat()"><i class="fas fa-file-export"></i></button>
                         <button class="goth-btn btn-confirm" onclick="saveChatSettings()">Seal Pact</button>
@@ -596,31 +460,19 @@
                 <div class="modal-box">
                     <h3 class="modal-title" style="color: #f00;">Sever Connection?</h3>
                     <p class="warn-text">This action allows the void to reclaim this soul.<br>All memories (chat history) will be lost forever.<br><br><b>Are you sure?</b></p>
-                    <div class="modal-actions">
-                        <button class="goth-btn btn-cancel" onclick="cancelDelete()">Mercy</button>
-                        <button class="goth-btn btn-delete" onclick="confirmDeleteContact()">Condemn</button>
-                    </div>
+                    <div class="modal-actions"><button class="goth-btn btn-cancel" onclick="cancelDelete()">Mercy</button><button class="goth-btn btn-delete" onclick="confirmDeleteContact()">Condemn</button></div>
                 </div>
             </div>
-
-            <!-- NEW MODAL: WIPE ALL DATA -->
+            
             <div id="modal-wipe-all" class="modal-overlay" style="z-index: 10001;">
                 <div class="modal-box" style="border-color: #f00; text-align: center;">
                     <h3 class="modal-title" style="color: #f00;">FINAL WARNING</h3>
-                    <p class="warn-text">
-                        You are about to erase EVERYTHING.<br>
-                        Contacts, Lore, Settings, Memories.<br>
-                        This cannot be undone.<br><br>
-                        <b>Are you absolutely certain?</b>
-                    </p>
-                    <div class="modal-actions">
-                        <button class="goth-btn btn-cancel" onclick="closeModal('modal-wipe-all')">Abort</button>
-                        <button class="goth-btn btn-delete" onclick="confirmWipeData()">OBLITERATE</button>
-                    </div>
+                    <p class="warn-text">You are about to erase EVERYTHING.<br>Contacts, Lore, Settings, Memories.<br>This cannot be undone.<br><br><b>Are you absolutely certain?</b></p>
+                    <div class="modal-actions"><button class="goth-btn btn-cancel" onclick="closeModal('modal-wipe-all')">Abort</button><button class="goth-btn btn-delete" onclick="confirmWipeData()">OBLITERATE</button></div>
                 </div>
             </div>
 
-            <!-- World Book -->
+            <!-- ================= GRIMOIRE (World Book) ================= -->
             <div id="app-world" class="app-view">
                 <div class="app-header">
                     <button class="header-btn btn-left" onclick="goHome()"><i class="fas fa-chevron-left"></i></button>
@@ -639,18 +491,49 @@
                         <label><input type="radio" name="scope" value="global" checked onclick="toggleWbScope()"> Global</label>
                         <label><input type="radio" name="scope" value="local" onclick="toggleWbScope()"> Local</label>
                     </div>
-                    <div class="form-row" id="wb-target-div" style="display: none;">
-                        <span class="form-label">Select Souls (Bound characters)</span>
-                        <div class="wb-checkbox-container" id="wb-target-list"></div>
-                    </div>
-                    <div class="modal-actions">
-                        <button class="goth-btn btn-cancel" onclick="closeModal('wb-modal')">Cancel</button>
-                        <button class="goth-btn btn-confirm" onclick="saveWorldBookEntry()">Inscribe</button>
-                    </div>
+                    <div class="form-row" id="wb-target-div" style="display: none;"><span class="form-label">Select Souls</span><div class="wb-checkbox-container" id="wb-target-list"></div></div>
+                    <div class="modal-actions"><button class="goth-btn btn-cancel" onclick="closeModal('wb-modal')">Cancel</button><button class="goth-btn btn-confirm" onclick="saveWorldBookEntry()">Inscribe</button></div>
                 </div>
             </div>
 
-            <!-- Pact -->
+            <!-- ================= NEW APP: VANITY (BEAUTIFY) ================= -->
+            <div id="app-beautify" class="app-view">
+                <div class="app-header">
+                    <button class="header-btn btn-left" onclick="goHome()"><i class="fas fa-chevron-left"></i></button>
+                    Vanity
+                </div>
+                <div class="app-content">
+                    <div class="setting-group">
+                        <label class="form-label" style="font-size: 14px; color: var(--primary-gold);">Display Mode</label>
+                        <button class="goth-btn" onclick="toggleFullScreenMode()"><i class="fas fa-expand"></i> Full Screen (Immersive)</button>
+                        <button class="goth-btn" style="margin-top: 10px;" onclick="toggleNoFrameMode()"><i class="fas fa-border-none"></i> No Frame Only (Keep Status Bar)</button>
+                    </div>
+
+                    <div class="setting-group" style="margin-top: 25px;">
+                        <label class="form-label" style="font-size: 14px; color: var(--primary-gold);">Home Screen Background</label>
+                        <div class="upload-container">
+                            <img id="setting-home-bg-preview" class="bg-preview" onclick="document.getElementById('setting-home-bg-file').click()">
+                            <input type="file" id="setting-home-bg-file" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'setting-home-bg-preview', 800)">
+                        </div>
+                        <button class="goth-btn btn-export" onclick="resetHomeBg()" style="font-size:12px; padding:5px 10px;">Reset Background</button>
+                    </div>
+
+                    <div class="setting-group" style="margin-top: 25px;">
+                        <label class="form-label" style="font-size: 14px; color: var(--primary-gold);">System Font</label>
+                        <input type="text" id="global-font-url" class="goth-input" placeholder="Import URL (e.g. Google Fonts)..." style="margin-bottom: 5px;">
+                        <input type="text" id="global-font-family" class="goth-input" placeholder="Font Family (e.g. 'Roboto', sans-serif)">
+                    </div>
+
+                    <div class="setting-group" style="margin-top: 25px;">
+                        <label class="form-label" style="font-size: 14px; color: var(--primary-gold);">Global Visual Seal (CSS)</label>
+                        <textarea id="global-css-input" class="goth-textarea" style="height: 120px; font-family: monospace; font-size: 10px;" placeholder="body { background: blue; }"></textarea>
+                    </div>
+
+                    <button class="goth-btn" style="margin-top: 30px;" onclick="saveVisualSettings()">Save Visuals</button>
+                </div>
+            </div>
+
+            <!-- ================= PACT (SETTINGS) ================= -->
             <div id="app-settings" class="app-view">
                 <div class="app-header">
                     <button class="header-btn btn-left" onclick="goHome()"><i class="fas fa-chevron-left"></i></button>
@@ -675,49 +558,17 @@
                         <button class="goth-btn" style="height: 38px; width: 40px; padding:0;" onclick="fetchModels()" title="Fetch Available Models"><i class="fas fa-sync-alt"></i></button>
                     </div>
                     
-                    <div class="setting-group" style="margin-top: 25px;">
-                        <label class="form-label" style="font-size: 14px; color: var(--primary-gold);">Home Screen Background</label>
-                        <div class="upload-container">
-                            <img id="setting-home-bg-preview" class="bg-preview" onclick="document.getElementById('setting-home-bg-file').click()">
-                            <input type="file" id="setting-home-bg-file" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'setting-home-bg-preview', 800)">
-                        </div>
-                        <button class="goth-btn btn-export" onclick="resetHomeBg()" style="font-size:12px; padding:5px 10px;">Reset Background</button>
-                    </div>
-                    
-                    <!-- DISPLAY MODES -->
-                    <div class="setting-group" style="margin-top: 25px;">
-                        <label class="form-label" style="font-size: 14px; color: var(--primary-gold);">Display Mode</label>
-                        <button class="goth-btn" onclick="toggleFullScreenMode()">
-                            <i class="fas fa-expand"></i> Full Screen (Immersive)
-                        </button>
-                        <button class="goth-btn" style="margin-top: 10px;" onclick="toggleNoFrameMode()">
-                            <i class="fas fa-border-none"></i> No Frame Only (Keep Status Bar)
-                        </button>
-                    </div>
-
-                    <div class="setting-group" style="margin-top: 15px;">
-                        <label class="form-label" style="font-size: 14px; color: var(--primary-gold);">System Font</label>
-                        <input type="text" id="global-font-url" class="goth-input" placeholder="Import URL (e.g. Google Fonts)..." style="margin-bottom: 5px;">
-                        <input type="text" id="global-font-family" class="goth-input" placeholder="Font Family (e.g. 'Roboto', sans-serif)">
-                    </div>
-                    <div class="setting-group" style="margin-top: 25px;">
-                        <label class="form-label" style="font-size: 14px; color: var(--primary-gold);">Global Visual Seal (CSS)</label>
-                        <textarea id="global-css-input" class="goth-textarea" style="height: 80px; font-family: monospace; font-size: 10px;" placeholder="body { background: blue; }"></textarea>
-                    </div>
                     <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">
-                        <button class="goth-btn" onclick="saveGlobalSettings()">Save System Settings</button>
+                        <button class="goth-btn" onclick="saveConnectionSettings()">Save Connection</button>
                         
-                        <button class="goth-btn btn-export" onclick="exportAllData()" style="border-color: var(--blood-red); color: var(--blood-red);">
+                        <button class="goth-btn btn-export" onclick="exportAllData()" style="border-color: var(--blood-red); color: var(--blood-red); margin-top: 20px;">
                             <i class="fas fa-download"></i> Extract Soul Core
                         </button>
-
-                        <!-- NEW: Import Button -->
                         <button class="goth-btn btn-export" onclick="document.getElementById('import-file').click()">
                             <i class="fas fa-file-import"></i> Import Soul Core
                         </button>
                         <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(this)">
 
-                        <!-- NEW: Wipe All Data -->
                         <button class="goth-btn btn-delete" style="margin-top: 30px;" onclick="askWipeData()">
                             <i class="fas fa-skull"></i> OBLITERATE ALL DATA
                         </button>
@@ -869,7 +720,6 @@
             else el.style.color = '';
         }
 
-        // Updated for higher resolution (500px) and quality (0.95)
         function handleImageUpload(input, previewId, maxSize = 500) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -900,7 +750,6 @@
             }
         }
 
-        // Updated for higher resolution (500px) and quality (0.95)
         function handleHomeAvatarUpload(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -1100,19 +949,10 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        function startPress(id) {
-            pressTimer = setTimeout(() => { showContextMenu(id); }, 500);
-        }
+        function startPress(id) { pressTimer = setTimeout(() => { showContextMenu(id); }, 500); }
         function cancelPress() { clearTimeout(pressTimer); }
-        function showContextMenu(id) {
-            selectedMessageId = id;
-            document.getElementById('context-menu-overlay').style.display = 'flex';
-            if(navigator.vibrate) navigator.vibrate(50);
-        }
-        function closeContextMenu() {
-            document.getElementById('context-menu-overlay').style.display = 'none';
-            selectedMessageId = null;
-        }
+        function showContextMenu(id) { selectedMessageId = id; document.getElementById('context-menu-overlay').style.display = 'flex'; if(navigator.vibrate) navigator.vibrate(50); }
+        function closeContextMenu() { document.getElementById('context-menu-overlay').style.display = 'none'; selectedMessageId = null; }
         function handleMenuAction(action) {
             if(!currentChatId || !selectedMessageId) return;
             const contact = contacts.find(c => c.id === currentChatId);
@@ -1120,72 +960,27 @@
             const msg = contact.messages[msgIndex];
 
             switch(action) {
-                case 'copy':
-                    if(!msg.isRecalled) { navigator.clipboard.writeText(msg.content); alert("Copied"); }
-                    break;
-                case 'quote':
-                    if(!msg.isRecalled) setQuote(msg);
-                    break;
-                case 'delete':
-                    if(confirm("Delete this message?")) { contact.messages.splice(msgIndex, 1); saveData(); renderMessages(contact); }
-                    break;
-                case 'recall':
-                    if(!msg.isRecalled) { msg.isRecalled = true; msg.recalledContent = msg.content; saveData(); renderMessages(contact); }
-                    break;
-                case 'multi':
-                    enterSelectionMode(); toggleSelectMessage(selectedMessageId);
-                    break;
+                case 'copy': if(!msg.isRecalled) { navigator.clipboard.writeText(msg.content); alert("Copied"); } break;
+                case 'quote': if(!msg.isRecalled) setQuote(msg); break;
+                case 'delete': if(confirm("Delete this message?")) { contact.messages.splice(msgIndex, 1); saveData(); renderMessages(contact); } break;
+                case 'recall': if(!msg.isRecalled) { msg.isRecalled = true; msg.recalledContent = msg.content; saveData(); renderMessages(contact); } break;
+                case 'multi': enterSelectionMode(); toggleSelectMessage(selectedMessageId); break;
             }
             closeContextMenu();
         }
 
-        function setQuote(msg) {
-            quoteMessageId = msg.id;
-            const bar = document.getElementById('quote-preview-bar');
-            const txt = document.getElementById('quote-preview-content');
-            let content = msg.content;
-            if(content.length > 30) content = content.substring(0, 30) + "...";
-            txt.innerText = `Replying to: "${content}"`;
-            bar.style.display = 'flex';
-        }
-        function cancelQuote() {
-            quoteMessageId = null;
-            document.getElementById('quote-preview-bar').style.display = 'none';
-        }
-
-        function enterSelectionMode() {
-            isSelectionMode = true; selectedMessages.clear();
-            document.getElementById('multi-select-bar').style.display = 'flex';
-            document.getElementById('chat-input-wrapper').style.display = 'none';
-            const contact = contacts.find(c => c.id === currentChatId);
-            renderMessages(contact);
-        }
-        function exitSelectionMode() {
-            isSelectionMode = false; selectedMessages.clear();
-            document.getElementById('multi-select-bar').style.display = 'none';
-            document.getElementById('chat-input-wrapper').style.display = 'flex';
-            const contact = contacts.find(c => c.id === currentChatId);
-            if(contact) renderMessages(contact);
-        }
-        function toggleSelectMessage(id) {
-            if(selectedMessages.has(id)) selectedMessages.delete(id); else selectedMessages.add(id);
-            const contact = contacts.find(c => c.id === currentChatId); renderMessages(contact);
-        }
-        function deleteSelectedMessages() {
-            if(selectedMessages.size === 0) return;
-            if(confirm(`Delete ${selectedMessages.size} messages?`)) {
-                const contact = contacts.find(c => c.id === currentChatId);
-                contact.messages = contact.messages.filter(m => !selectedMessages.has(m.id));
-                saveData(); exitSelectionMode();
-            }
-        }
+        function setQuote(msg) { quoteMessageId = msg.id; const bar = document.getElementById('quote-preview-bar'); const txt = document.getElementById('quote-preview-content'); let content = msg.content; if(content.length > 30) content = content.substring(0, 30) + "..."; txt.innerText = `Replying to: "${content}"`; bar.style.display = 'flex'; }
+        function cancelQuote() { quoteMessageId = null; document.getElementById('quote-preview-bar').style.display = 'none'; }
+        function enterSelectionMode() { isSelectionMode = true; selectedMessages.clear(); document.getElementById('multi-select-bar').style.display = 'flex'; document.getElementById('chat-input-wrapper').style.display = 'none'; const contact = contacts.find(c => c.id === currentChatId); renderMessages(contact); }
+        function exitSelectionMode() { isSelectionMode = false; selectedMessages.clear(); document.getElementById('multi-select-bar').style.display = 'none'; document.getElementById('chat-input-wrapper').style.display = 'flex'; const contact = contacts.find(c => c.id === currentChatId); if(contact) renderMessages(contact); }
+        function toggleSelectMessage(id) { if(selectedMessages.has(id)) selectedMessages.delete(id); else selectedMessages.add(id); const contact = contacts.find(c => c.id === currentChatId); renderMessages(contact); }
+        function deleteSelectedMessages() { if(selectedMessages.size === 0) return; if(confirm(`Delete ${selectedMessages.size} messages?`)) { const contact = contacts.find(c => c.id === currentChatId); contact.messages = contact.messages.filter(m => !selectedMessages.has(m.id)); saveData(); exitSelectionMode(); } }
 
         function sendChatMessage() {
             if(!currentChatId) return;
             const input = document.getElementById('msg-input'); 
             const text = input.value.trim(); 
             const contact = contacts.find(c => c.id === currentChatId);
-            
             if(text) {
                 const newMsg = { id: uuidv4(), role: 'user', content: text, quoteId: quoteMessageId };
                 contact.messages.push(newMsg); 
@@ -1206,50 +1001,23 @@
             
             fetchAiResponse(contact).then(async responseContent => {
                 const temp = document.getElementById('temp-loading'); if(temp) temp.remove();
-                
-                let parts = [];
-                if (responseContent.includes('|||')) {
-                    parts = responseContent.split('|||').map(p => p.trim()).filter(p => p.length > 0);
-                } else {
-                    parts = [responseContent];
-                }
-
-                // Sequential Delivery with Typing Indicator
+                let parts = responseContent.includes('|||') ? responseContent.split('|||').map(p => p.trim()).filter(p => p.length > 0) : [responseContent];
                 for (let i = 0; i < parts.length; i++) {
-                    const part = parts[i];
-                    
-                    contact.messages.push({ id: uuidv4(), role: 'assistant', content: part });
+                    contact.messages.push({ id: uuidv4(), role: 'assistant', content: parts[i] });
                     saveData();
                     if(document.getElementById('app-chat-conversation').classList.contains('active')) { renderMessages(contact); }
-                    
                     if (i < parts.length - 1) {
-                        // Show Typing Indicator for next message
                         if(document.getElementById('app-chat-conversation').classList.contains('active')) {
                             const typeId = 'typing-' + Date.now();
                             const container = document.getElementById('message-container');
                             const row = document.createElement('div'); row.className = 'chat-row received'; row.id = typeId;
-                            const charAvatarSrc = contact.avatar || "";
-                            const charFallback = `<div class="chat-avatar-small" style="display:flex;align-items:center;justify-content:center;color:#aaa;">${contact.name[0]}</div>`;
-                            const avatarHtml = charAvatarSrc ? `<img src="${charAvatarSrc}" class="chat-avatar-small">` : charFallback;
                             row.innerHTML = `${avatarHtml}<div class="msg-bubble"><i class="fas fa-ellipsis-h" style="animation: blink 1.5s infinite"></i></div>`;
-                            container.appendChild(row); 
-                            container.scrollTop = container.scrollHeight;
-                            
-                            // Delay calculation: base 800ms + 50ms per char of the NEXT message
-                            const nextMsgLen = parts[i+1].length;
-                            const delay = 800 + Math.min(nextMsgLen * 50, 2000); 
-                            
-                            await new Promise(resolve => setTimeout(resolve, delay));
-                            
-                            const typeEl = document.getElementById(typeId);
-                            if(typeEl) typeEl.remove();
-                        } else {
-                            // If user left screen, just wait a bit
-                            await new Promise(resolve => setTimeout(resolve, 1500));
-                        }
+                            container.appendChild(row); container.scrollTop = container.scrollHeight;
+                            await new Promise(resolve => setTimeout(resolve, 800 + Math.min(parts[i+1].length * 50, 2000)));
+                            const typeEl = document.getElementById(typeId); if(typeEl) typeEl.remove();
+                        } else { await new Promise(resolve => setTimeout(resolve, 1500)); }
                     }
                 }
-
             }).catch(err => {
                 const temp = document.getElementById('temp-loading'); if(temp) temp.remove();
                 contact.messages.push({ id: uuidv4(), role: 'assistant', content: `[CONNECTION SEVERED] ${err.message}` });
@@ -1261,77 +1029,38 @@
             const apiUrl = localStorage.getItem('gothic_api_url');
             const apiKey = localStorage.getItem('gothic_api_key');
             const apiModel = localStorage.getItem('gothic_api_model') || "gpt-3.5-turbo";
-
             if (!apiUrl || !apiKey) throw new Error("Pact Unsealed.");
-
-            let systemPrompt = `[System: You MUST reply in Simplified Chinese (简体中文).]\n`;
-            systemPrompt += `You are ${contact.name}.\nPersona: ${contact.persona}\n`;
-            if(contact.userName) systemPrompt += `User Name: ${contact.userName}\n`;
-            if(contact.userPersona) systemPrompt += `User Persona: ${contact.userPersona}\n`;
-            
+            let systemPrompt = `[System: You MUST reply in Simplified Chinese (简体中文).]\nYou are ${contact.name}.\nPersona: ${contact.persona}\n`;
+            if(contact.userName) systemPrompt += `User Name: ${contact.userName}\nUser Persona: ${contact.userPersona}\n`;
             let requestedTokens = 500; 
-
             if (contact.offlineMode) {
-                // --- OFFLINE MODE (Long / Complete / Novel Style) ---
                 let targetWords = contact.targetLength || 500;
-                systemPrompt += `\n[MODE: OFFLINE / NOVEL ROLEPLAY]\n`;
-                systemPrompt += `1. RULE: Output a SINGLE, CONTINUOUS narrative block. Do NOT split into multiple lines.\n`;
-                systemPrompt += `2. FORMAT: You MUST enclose spoken dialogue in double quotes ("..."). Mix dialogue with detailed descriptions of actions and feelings.\n`;
-                systemPrompt += `3. INTERACTION: You must respond to the User's actions. Control ${contact.name} to advance the plot.\n`;
-                systemPrompt += `4. LENGTH: The user requested ~${targetWords} words. You MUST write approximately this amount.\n`;
-                systemPrompt += `5. COMPLETENESS: Your response MUST be a complete scene. Do NOT stop mid-sentence. Ensure the ending is resolved.\n`;
-                systemPrompt += `6. PERSPECTIVE: DEFAULT RULE -> Refer to yourself (${contact.name}) using Third Person (Name/He/She). Refer to the User using Second Person (You/你). Only deviate from this if the User explicitly requests a different perspective in the chat.\n`;
-                
+                systemPrompt += `\n[MODE: OFFLINE / NOVEL ROLEPLAY]\n1. Output a SINGLE, CONTINUOUS narrative block.\n2. Enclose dialogue in double quotes.\n3. Length: ~${targetWords} words.\n4. Complete scene.\n5. Third Person perspective for ${contact.name}, Second Person for User.\n`;
                 requestedTokens = Math.min(Math.ceil(targetWords * 3) + 500, 4000); 
-
             } else {
-                // --- ONLINE MODE (Multiple Short Messages) ---
-                systemPrompt += `\n[MODE: ONLINE / TEXT MESSAGING]\n`;
-                systemPrompt += `1. RULE: You are simulating sending multiple text messages. \n`;
-                systemPrompt += `2. FORMAT: Output 1 to 5 short, distinct messages. You MUST separate each message with the delimiter '|||'.\n`;
-                systemPrompt += `   Example Output: "Hey, are you there?|||I was thinking about you.|||Call me when you can."\n`;
-                systemPrompt += `3. TONE: Casual, SMS style. No novel descriptions.\n`;
+                systemPrompt += `\n[MODE: ONLINE / SMS]\n1. Multiple short messages separated by '|||'.\n2. Tone: Casual.\n`;
                 requestedTokens = 800;
             }
-
-            systemPrompt += `\n[World Info / Lore]\n`;
+            systemPrompt += `\n[World Info]\n`;
             let hasLore = false;
             worldBook.forEach(w => {
-                let isRelevant = false;
-                if(w.scope === 'global') isRelevant = true;
-                else if(w.scope === 'local') {
-                    const targets = Array.isArray(w.target) ? w.target : [w.target];
-                    if(targets.includes(contact.name)) isRelevant = true;
-                }
+                let isRelevant = (w.scope === 'global') || (w.scope === 'local' && (Array.isArray(w.target) ? w.target : [w.target]).includes(contact.name));
                 if (isRelevant) { systemPrompt += `${w.title}: ${w.content}\n`; hasLore = true; }
             });
             if(!hasLore) systemPrompt += "None.\n";
-            systemPrompt += `\nStay in character. Reply in Simplified Chinese.`;
-
-            const contextMessages = contact.messages
-                .filter(m => !m.content.includes("[CONNECTION SEVERED]") && !m.isRecalled)
-                .slice(-10)
-                .map(m => {
-                    let text = m.content;
-                    if(m.quoteId) {
-                        const original = contact.messages.find(om => om.id === m.quoteId);
-                        if(original && !original.isRecalled) { text = `[Replying to: "${original.content}"]\n${text}`; }
-                    }
-                    return { role: m.role, content: text };
-                });
-
+            const contextMessages = contact.messages.filter(m => !m.content.includes("[CONNECTION SEVERED]") && !m.isRecalled).slice(-10).map(m => {
+                let text = m.content;
+                if(m.quoteId) { const original = contact.messages.find(om => om.id === m.quoteId); if(original && !original.isRecalled) text = `[Replying to: "${original.content}"]\n${text}`; }
+                return { role: m.role, content: text };
+            });
             const payload = { model: apiModel, messages: [ { role: "system", content: systemPrompt }, ...contextMessages ], max_tokens: requestedTokens, temperature: 0.8 };
             const res = await fetch(`${apiUrl}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify(payload) });
             if (!res.ok) throw new Error(`API Error ${res.status}`);
             const data = await res.json();
-            if(data.choices && data.choices.length > 0) return data.choices[0].message.content;
-            else throw new Error("Empty choices.");
+            if(data.choices && data.choices.length > 0) return data.choices[0].message.content; else throw new Error("Empty choices.");
         }
 
-        function toggleOfflineInput() {
-            const isChecked = document.getElementById('setting-offline-mode').checked;
-            document.getElementById('offline-length-container').style.display = isChecked ? 'block' : 'none';
-        }
+        function toggleOfflineInput() { document.getElementById('offline-length-container').style.display = document.getElementById('setting-offline-mode').checked ? 'block' : 'none'; }
         function openChatSettingsModal() {
             if(!currentChatId) return;
             const contact = contacts.find(c => c.id === currentChatId);
@@ -1372,58 +1101,57 @@
             }
             closeModal('modal-chat-settings');
         }
-        function askDeleteContact() {
-            document.getElementById('modal-chat-settings').style.display = 'none';
-            document.getElementById('modal-confirm-delete').style.display = 'flex';
-        }
-        function cancelDelete() {
-            document.getElementById('modal-confirm-delete').style.display = 'none';
-            document.getElementById('modal-chat-settings').style.display = 'flex';
-        }
-        function confirmDeleteContact() {
-            if(!currentChatId) return;
-            contacts = contacts.filter(c => c.id !== currentChatId);
-            saveData();
-            closeModal('modal-confirm-delete');
-            backToContactList();
-        }
+        function askDeleteContact() { document.getElementById('modal-chat-settings').style.display = 'none'; document.getElementById('modal-confirm-delete').style.display = 'flex'; }
+        function cancelDelete() { document.getElementById('modal-confirm-delete').style.display = 'none'; document.getElementById('modal-chat-settings').style.display = 'flex'; }
+        function confirmDeleteContact() { if(!currentChatId) return; contacts = contacts.filter(c => c.id !== currentChatId); saveData(); closeModal('modal-confirm-delete'); backToContactList(); }
+        
         function exportCurrentChat() {
             if(!currentChatId) return;
             const contact = contacts.find(c => c.id === currentChatId);
             const exportData = { name: contact.name, exportDate: new Date().toISOString(), messages: contact.messages };
             const blob = new Blob([JSON.stringify(exportData, null, 2)], {type : 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `whispers_${contact.name}.json`; a.click(); URL.revokeObjectURL(url);
+            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `whispers_${contact.name}.json`; a.click(); URL.revokeObjectURL(url);
         }
         function exportAllData() {
             const backup = { date: new Date().toISOString(), contacts, worldBook, globalSettings: { apiUrl: localStorage.getItem('gothic_api_url'), globalCss: localStorage.getItem('gothic_global_css') }, homePrefs };
             const blob = new Blob([JSON.stringify(backup, null, 2)], {type : 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `gothic_full_backup.json`; a.click(); URL.revokeObjectURL(url);
+            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `gothic_full_backup.json`; a.click(); URL.revokeObjectURL(url);
         }
-        function saveGlobalSettings() {
+
+        // --- NEW SAVE FUNCTIONS ---
+
+        function saveConnectionSettings() {
             const url = document.getElementById('global-api-url').value;
             const key = document.getElementById('global-api-key').value;
             const model = document.getElementById('global-model-select').value;
-            const css = document.getElementById('global-css-input').value;
-            const fontUrl = document.getElementById('global-font-url').value;
-            const fontFam = document.getElementById('global-font-family').value;
             localStorage.setItem('gothic_api_url', url);
             localStorage.setItem('gothic_api_key', key);
             localStorage.setItem('gothic_api_model', model);
+            alert("Connection established.");
+        }
+
+        function saveVisualSettings() {
+            const css = document.getElementById('global-css-input').value;
+            const fontUrl = document.getElementById('global-font-url').value;
+            const fontFam = document.getElementById('global-font-family').value;
+            
             localStorage.setItem('gothic_global_css', css);
             localStorage.setItem('gothic_font_url', fontUrl);
             localStorage.setItem('gothic_font_family', fontFam);
+            
             document.getElementById('user-global-style').innerHTML = css;
             applyFontSettings(fontUrl, fontFam);
             
-            // Save Home BG
-            if(tempImgData.homeBg) homePrefs.background = tempImgData.homeBg;
-            saveHomePrefs();
-            if(homePrefs.background) document.getElementById('home-screen').style.backgroundImage = `url(${homePrefs.background})`;
+            // Save Home BG if changed
+            if(tempImgData.homeBg) {
+                homePrefs.background = tempImgData.homeBg;
+                saveHomePrefs();
+                document.getElementById('home-screen').style.backgroundImage = `url(${homePrefs.background})`;
+            }
 
-            alert("System pact sealed.");
+            alert("Visuals applied.");
         }
+
         async function fetchModels() {
             const apiUrl = document.getElementById('global-api-url').value;
             const apiKey = document.getElementById('global-api-key').value;
@@ -1442,6 +1170,8 @@
                 } else throw new Error("Invalid format");
             } catch(e) { alert("Error fetching models: " + e.message); } finally { btn.className = "fas fa-sync-alt"; }
         }
+
+        // --- COMMON ---
         function renderWbTargetCheckboxes(selectedTargets = []) {
             if(!Array.isArray(selectedTargets)) selectedTargets = [selectedTargets];
             const container = document.getElementById('wb-target-list'); container.innerHTML = '';
@@ -1454,18 +1184,12 @@
                 div.appendChild(checkbox); div.appendChild(label); container.appendChild(div);
             });
         }
-        function openWorldBookModal() {
-            wbEditIndex = -1; document.getElementById('wb-modal-title').innerText = "Inscribe New Lore";
-            document.getElementById('wb-title').value = ''; document.getElementById('wb-content').value = '';
-            renderWbTargetCheckboxes([]);
-            document.querySelector('input[name="scope"][value="global"]').checked = true; toggleWbScope();
-            document.getElementById('wb-modal').style.display = 'flex';
-        }
-        function toggleWbScope() { const scope = document.querySelector('input[name="scope"]:checked').value; document.getElementById('wb-target-div').style.display = (scope === 'local') ? 'block' : 'none'; }
+        function openWorldBookModal() { wbEditIndex = -1; document.getElementById('wb-modal-title').innerText = "Inscribe New Lore"; document.getElementById('wb-title').value = ''; document.getElementById('wb-content').value = ''; renderWbTargetCheckboxes([]); document.querySelector('input[name="scope"][value="global"]').checked = true; toggleWbScope(); document.getElementById('wb-modal').style.display = 'flex'; }
+        function toggleWbScope() { document.getElementById('wb-target-div').style.display = document.querySelector('input[name="scope"]:checked').value === 'local' ? 'block' : 'none'; }
         function saveWorldBookEntry() {
             const title = document.getElementById('wb-title').value.trim(); const content = document.getElementById('wb-content').value.trim();
             const scope = document.querySelector('input[name="scope"]:checked').value; 
-            let targets = []; const checkboxes = document.querySelectorAll('#wb-target-list input[type="checkbox"]:checked'); checkboxes.forEach(chk => targets.push(chk.value));
+            let targets = []; document.querySelectorAll('#wb-target-list input[type="checkbox"]:checked').forEach(chk => targets.push(chk.value));
             if(!title || !content) return;
             const entry = { title, content, scope, target: scope==='local' ? targets : null };
             if(wbEditIndex === -1) worldBook.push(entry); else worldBook[wbEditIndex] = entry;
@@ -1475,97 +1199,41 @@
             const list = document.getElementById('world-book-list'); list.innerHTML = '';
             worldBook.forEach((entry, index) => {
                 const div = document.createElement('div'); div.className = 'lore-entry';
-                const tagClass = entry.scope === 'global' ? 'tag-global' : 'tag-local';
                 let targetText = ''; if(entry.scope === 'local') { const t = Array.isArray(entry.target) ? entry.target.join(", ") : entry.target; targetText = `<div class="lore-target">Bound to: ${t}</div>`; }
-                div.innerHTML = `<div class="lore-header"><h3 class="lore-title">${escapeHtml(entry.title)}</h3><span class="lore-scope-tag ${tagClass}">${entry.scope.toUpperCase()}</span></div><p class="lore-content">${escapeHtml(entry.content)}</p>${targetText}<div class="lore-actions"><button class="icon-btn" onclick="editLore(${index})"><i class="fas fa-pen-nib"></i></button><button class="icon-btn" onclick="deleteLore(${index})"><i class="fas fa-trash"></i></button></div>`;
+                div.innerHTML = `<div class="lore-header"><h3 class="lore-title">${escapeHtml(entry.title)}</h3><span class="lore-scope-tag ${entry.scope === 'global' ? 'tag-global' : 'tag-local'}">${entry.scope.toUpperCase()}</span></div><p class="lore-content">${escapeHtml(entry.content)}</p>${targetText}<div class="lore-actions"><button class="icon-btn" onclick="editLore(${index})"><i class="fas fa-pen-nib"></i></button><button class="icon-btn" onclick="deleteLore(${index})"><i class="fas fa-trash"></i></button></div>`;
                 list.appendChild(div);
             });
         }
-        function editLore(index) {
-            wbEditIndex = index; const entry = worldBook[index];
-            document.getElementById('wb-title').value = entry.title; document.getElementById('wb-content').value = entry.content;
-            const targets = Array.isArray(entry.target) ? entry.target : (entry.target ? [entry.target] : []);
-            renderWbTargetCheckboxes(targets);
-            const radios = document.getElementsByName('scope'); for(let r of radios) { if(r.value === entry.scope) r.checked = true; }
-            toggleWbScope(); document.getElementById('wb-modal').style.display = 'flex';
-        }
+        function editLore(index) { wbEditIndex = index; const entry = worldBook[index]; document.getElementById('wb-title').value = entry.title; document.getElementById('wb-content').value = entry.content; const targets = Array.isArray(entry.target) ? entry.target : (entry.target ? [entry.target] : []); renderWbTargetCheckboxes(targets); const radios = document.getElementsByName('scope'); for(let r of radios) { if(r.value === entry.scope) r.checked = true; } toggleWbScope(); document.getElementById('wb-modal').style.display = 'flex'; }
         function deleteLore(index) { if(confirm("Burn page?")) { worldBook.splice(index, 1); saveData(); renderWorldBook(); } }
-        function updateClock() { 
-            const now = new Date(); 
-            const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-            document.getElementById('clock').innerText = timeStr; 
-            const widget = document.getElementById('home-widget-clock');
-            if(widget) widget.innerText = timeStr;
-        }
-
-        // --- UPDATED TOGGLE FUNCTIONS WITH PERSISTENCE ---
-
-        function toggleFullScreenMode() {
-            document.body.classList.remove('no-frame-mode'); // Exclusive
-            if (document.body.classList.contains('full-screen-mode')) {
-                document.body.classList.remove('full-screen-mode');
-                localStorage.setItem('gothic_display_mode', 'default');
-            } else {
-                document.body.classList.add('full-screen-mode');
-                localStorage.setItem('gothic_display_mode', 'fullscreen');
-            }
-        }
-
-        function toggleNoFrameMode() {
-            document.body.classList.remove('full-screen-mode'); // Exclusive
-            if (document.body.classList.contains('no-frame-mode')) {
-                document.body.classList.remove('no-frame-mode');
-                localStorage.setItem('gothic_display_mode', 'default');
-            } else {
-                document.body.classList.add('no-frame-mode');
-                localStorage.setItem('gothic_display_mode', 'noframe');
-            }
-        }
-
+        function updateClock() { const now = new Date(); document.getElementById('clock').innerText = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0'); const widget = document.getElementById('home-widget-clock'); if(widget) widget.innerText = document.getElementById('clock').innerText; }
+        function toggleFullScreenMode() { document.body.classList.remove('no-frame-mode'); if (document.body.classList.contains('full-screen-mode')) { document.body.classList.remove('full-screen-mode'); localStorage.setItem('gothic_display_mode', 'default'); } else { document.body.classList.add('full-screen-mode'); localStorage.setItem('gothic_display_mode', 'fullscreen'); } }
+        function toggleNoFrameMode() { document.body.classList.remove('full-screen-mode'); if (document.body.classList.contains('no-frame-mode')) { document.body.classList.remove('no-frame-mode'); localStorage.setItem('gothic_display_mode', 'default'); } else { document.body.classList.add('no-frame-mode'); localStorage.setItem('gothic_display_mode', 'noframe'); } }
         function escapeHtml(text) { if(!text) return ''; return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-
-        // --- NEW FUNCTIONS FOR DATA MANAGEMENT ---
-
+        
         function handleImport(input) {
-            const file = input.files[0];
-            if(!file) return;
+            const file = input.files[0]; if(!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    // Validation: Check for key fields
                     if(!data.contacts && !data.globalSettings) throw new Error("Invalid Soul Core file.");
-
                     if(confirm("Overwrite current reality with this backup?")) {
                         if(data.contacts) localStorage.setItem('gothic_contacts', JSON.stringify(data.contacts));
                         if(data.worldBook) localStorage.setItem('gothic_worldbook', JSON.stringify(data.worldBook));
                         if(data.homePrefs) localStorage.setItem('gothic_home_prefs', JSON.stringify(data.homePrefs));
-                        
                         if(data.globalSettings) {
                             if(data.globalSettings.apiUrl) localStorage.setItem('gothic_api_url', data.globalSettings.apiUrl);
                             if(data.globalSettings.globalCss) localStorage.setItem('gothic_global_css', data.globalSettings.globalCss);
                         }
-                        
-                        alert("Reality rewritten. System restarting...");
-                        location.reload();
+                        alert("Reality rewritten. System restarting..."); location.reload();
                     }
-                } catch(err) {
-                    alert("Import failed: " + err.message);
-                }
+                } catch(err) { alert("Import failed: " + err.message); }
             };
-            reader.readAsText(file);
-            input.value = ''; // Reset
+            reader.readAsText(file); input.value = '';
         }
-
-        function askWipeData() {
-            document.getElementById('modal-wipe-all').style.display = 'flex';
-        }
-
-        function confirmWipeData() {
-            localStorage.clear();
-            location.reload();
-        }
-
+        function askWipeData() { document.getElementById('modal-wipe-all').style.display = 'flex'; }
+        function confirmWipeData() { localStorage.clear(); location.reload(); }
     </script>
 </body>
 </html>

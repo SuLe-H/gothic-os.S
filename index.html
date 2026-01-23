@@ -46,23 +46,21 @@
             transition: all 0.5s ease;
         }
 
-        /* --- MODE 1: FULL SCREEN (IMMERSIVE) - No Frame, No Status Bar --- */
+        /* --- MODE 1: FULL SCREEN (IMMERSIVE) --- */
         body.full-screen-mode .phone-case {
             width: 100vw; height: 100vh; border: none; border-radius: 0; padding: 0; box-shadow: none; background: none;
         }
         body.full-screen-mode .screen { border-radius: 0; }
         body.full-screen-mode .status-bar { display: none !important; }
-        
-        /* Adjustment for Full Screen Mode: Remove top padding since status bar is gone */
-        body.full-screen-mode .app-view { padding-top: 0 !important; }
+        /* Fix layout when status bar is hidden */
+        body.full-screen-mode .app-view { top: 0 !important; height: 100% !important; }
         body.full-screen-mode #home-screen { padding-top: 40px !important; }
 
-        /* --- MODE 2: NO FRAME (DESKTOP) - No Frame, BUT KEEPS Status Bar --- */
+        /* --- MODE 2: NO FRAME (DESKTOP) --- */
         body.no-frame-mode .phone-case {
             width: 100vw; height: 100vh; border: none; border-radius: 0; padding: 0; box-shadow: none; background: none;
         }
         body.no-frame-mode .screen { border-radius: 0; }
-        /* Note: Status bar remains visible in this mode */
 
         .screen {
             width: 100%;
@@ -79,31 +77,42 @@
             transition: border-radius 0.5s ease;
         }
 
-        /* Status Bar - FIXED: Transparent and Absolute */
+        /* --- STATUS BAR LOGIC --- */
+        
+        /* Default: Solid/Relative for APPS (Chat, Settings, etc.) */
         .status-bar {
-            position: absolute; /* Float on top */
-            top: 0; left: 0; width: 100%;
             height: 30px; 
-            display: flex; justify-content: space-between; 
-            padding: 5px 20px; box-sizing: border-box;
+            display: flex; justify-content: space-between; padding: 5px 20px;
             font-size: 14px; align-items: center; 
-            background: transparent !important; /* Force transparent */
-            z-index: 1000; /* Highest layer */
-            pointer-events: none; /* Let clicks pass through if needed */
+            background: #0a0202; /* Solid dark background for apps */
+            z-index: 100; flex-shrink: 0;
+            position: relative; /* Sits in flow, pushing app content down */
+            box-sizing: border-box;
+            border-bottom: 1px solid #1a0505;
         }
 
-        /* Apps - FIXED: Start from top 0 to show background behind status bar */
+        /* Special: Transparent/Absolute ONLY for HOME SCREEN */
+        .screen.home-active .status-bar {
+            position: absolute; /* Float over wallpaper */
+            top: 0; left: 0; width: 100%;
+            background: transparent; /* See-through */
+            border-bottom: none;
+        }
+
+        /* --- LAYOUTS --- */
+
+        /* Apps */
         .app-view {
             position: absolute; 
-            top: 0; /* Was 30px, now 0 to cover full screen */
+            top: 30px; /* Start BELOW status bar by default */
             bottom: 0; left: 0; width: 100%;
-            padding-top: 30px; /* Push content down to avoid status bar overlap */
             background-color: var(--screen-bg); z-index: 10;
             display: none; flex-direction: column; box-sizing: border-box;
             animation: fadeIn 0.3s ease-out;
             background-size: cover; background-position: center; background-repeat: no-repeat;
         }
         .app-view.active { display: flex; }
+        
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .app-header {
@@ -114,6 +123,20 @@
             flex-shrink: 0; position: relative;
         }
 
+        /* Home Screen */
+        #home-screen {
+            position: absolute; 
+            top: 0; 
+            bottom: 0; width: 100%;
+            display: flex; flex-direction: column;
+            /* Padding top accounts for the absolute status bar in Home mode */
+            padding: 40px 20px 20px 20px; 
+            box-sizing: border-box; overflow-y: auto;
+            align-items: center;
+            background-size: cover; background-position: center;
+        }
+
+        /* Rest of the CSS remains exactly the same... */
         /* Smaller Chat Title */
         #chat-title-name {
             font-size: 18px; 
@@ -132,18 +155,6 @@
         .app-content { flex: 1; overflow-y: auto; padding: 15px; position: relative; min-height: 0; padding-bottom: 20px; }
         .app-content::-webkit-scrollbar { width: 6px; }
         .app-content::-webkit-scrollbar-thumb { background: var(--blood-red); border-radius: 3px; }
-
-        /* Home Screen - FIXED: Start from top 0 */
-        #home-screen {
-            position: absolute; 
-            top: 0; /* Was 30px */
-            bottom: 0; width: 100%;
-            display: flex; flex-direction: column;
-            padding: 70px 20px 40px 20px; /* Added 30px top padding (40+30=70) */
-            box-sizing: border-box; overflow-y: auto;
-            align-items: center;
-            background-size: cover; background-position: center;
-        }
         
         /* Home Widget Styles */
         #home-widget-container {
@@ -743,6 +754,10 @@
             loadData(); renderContactList(); renderWorldBook(); 
             updateClock(); setInterval(updateClock, 1000);
             initBattery();
+            
+            // Initialize in Home Mode
+            document.querySelector('.screen').classList.add('home-active');
+
             document.getElementById('msg-input').addEventListener('keypress', function(e){ if(e.key === 'Enter') sendChatMessage(); });
             document.addEventListener('click', (e) => {
                 if(!e.target.closest('.msg-bubble') && !e.target.closest('.context-menu')) {
@@ -932,6 +947,10 @@
         function openApp(appId) {
             document.getElementById('home-screen').style.display = 'none';
             document.querySelectorAll('.app-view').forEach(el => el.classList.remove('active'));
+            
+            // --- DISABLE HOME MODE (RESTORE SOLID STATUS BAR) ---
+            document.querySelector('.screen').classList.remove('home-active');
+
             if(appId === 'app-chat') {
                 document.getElementById('app-chat').classList.add('active');
                 document.getElementById('app-chat-conversation').classList.remove('active');
@@ -946,6 +965,10 @@
             document.querySelectorAll('.app-view').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.modal-overlay').forEach(el => el.style.display = 'none');
             document.getElementById('home-screen').style.display = 'flex'; // Changed to flex for vertical layout
+            
+            // --- ENABLE HOME MODE (TRANSPARENT STATUS BAR) ---
+            document.querySelector('.screen').classList.add('home-active');
+
             document.getElementById('current-chat-style').innerHTML = '';
             document.getElementById('app-chat-conversation').style.backgroundImage = '';
             exitSelectionMode();

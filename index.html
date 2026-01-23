@@ -52,7 +52,10 @@
         }
         body.full-screen-mode .screen { border-radius: 0; }
         body.full-screen-mode .status-bar { display: none !important; }
-        body.full-screen-mode .app-view, body.full-screen-mode #home-screen { top: 0; }
+        
+        /* Adjustment for Full Screen Mode: Remove top padding since status bar is gone */
+        body.full-screen-mode .app-view { padding-top: 0 !important; }
+        body.full-screen-mode #home-screen { padding-top: 40px !important; }
 
         /* --- MODE 2: NO FRAME (DESKTOP) - No Frame, BUT KEEPS Status Bar --- */
         body.no-frame-mode .phone-case {
@@ -76,17 +79,25 @@
             transition: border-radius 0.5s ease;
         }
 
-        /* Status Bar - Transparent */
+        /* Status Bar - FIXED: Transparent and Absolute */
         .status-bar {
-            height: 30px; display: flex; justify-content: space-between; padding: 5px 20px;
+            position: absolute; /* Float on top */
+            top: 0; left: 0; width: 100%;
+            height: 30px; 
+            display: flex; justify-content: space-between; 
+            padding: 5px 20px; box-sizing: border-box;
             font-size: 14px; align-items: center; 
-            background: transparent;
-            z-index: 100; flex-shrink: 0; 
+            background: transparent !important; /* Force transparent */
+            z-index: 1000; /* Highest layer */
+            pointer-events: none; /* Let clicks pass through if needed */
         }
 
-        /* Apps */
+        /* Apps - FIXED: Start from top 0 to show background behind status bar */
         .app-view {
-            position: absolute; top: 30px; bottom: 0; left: 0; width: 100%;
+            position: absolute; 
+            top: 0; /* Was 30px, now 0 to cover full screen */
+            bottom: 0; left: 0; width: 100%;
+            padding-top: 30px; /* Push content down to avoid status bar overlap */
             background-color: var(--screen-bg); z-index: 10;
             display: none; flex-direction: column; box-sizing: border-box;
             animation: fadeIn 0.3s ease-out;
@@ -122,11 +133,14 @@
         .app-content::-webkit-scrollbar { width: 6px; }
         .app-content::-webkit-scrollbar-thumb { background: var(--blood-red); border-radius: 3px; }
 
-        /* Home Screen */
+        /* Home Screen - FIXED: Start from top 0 */
         #home-screen {
-            position: absolute; top: 30px; bottom: 0; width: 100%;
+            position: absolute; 
+            top: 0; /* Was 30px */
+            bottom: 0; width: 100%;
             display: flex; flex-direction: column;
-            padding: 40px 20px; box-sizing: border-box; overflow-y: auto;
+            padding: 70px 20px 40px 20px; /* Added 30px top padding (40+30=70) */
+            box-sizing: border-box; overflow-y: auto;
             align-items: center;
             background-size: cover; background-position: center;
         }

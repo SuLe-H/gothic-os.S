@@ -76,12 +76,11 @@
             transition: border-radius 0.5s ease;
         }
 
-        /* Status Bar - MODIFIED: Transparent */
+        /* Status Bar - Transparent */
         .status-bar {
             height: 30px; display: flex; justify-content: space-between; padding: 5px 20px;
             font-size: 14px; align-items: center; 
-            background: transparent; /* Changed from rgba */
-            /* backdrop-filter: blur(2px); Removed blur for cleaner transparency */
+            background: transparent;
             z-index: 100; flex-shrink: 0; 
         }
 
@@ -104,10 +103,10 @@
             flex-shrink: 0; position: relative;
         }
 
-        /* MODIFIED: Smaller Chat Title */
+        /* Smaller Chat Title */
         #chat-title-name {
-            font-size: 18px; /* Reduced from inheriting 24px */
-            font-family: 'MedievalSharp', cursive; /* Optional: switch to standard font for readability, or keep Gothic */
+            font-size: 18px; 
+            font-family: 'MedievalSharp', cursive;
             letter-spacing: 1px;
         }
         
@@ -579,6 +578,23 @@
                 </div>
             </div>
 
+            <!-- NEW MODAL: WIPE ALL DATA -->
+            <div id="modal-wipe-all" class="modal-overlay" style="z-index: 10001;">
+                <div class="modal-box" style="border-color: #f00; text-align: center;">
+                    <h3 class="modal-title" style="color: #f00;">FINAL WARNING</h3>
+                    <p class="warn-text">
+                        You are about to erase EVERYTHING.<br>
+                        Contacts, Lore, Settings, Memories.<br>
+                        This cannot be undone.<br><br>
+                        <b>Are you absolutely certain?</b>
+                    </p>
+                    <div class="modal-actions">
+                        <button class="goth-btn btn-cancel" onclick="closeModal('modal-wipe-all')">Abort</button>
+                        <button class="goth-btn btn-delete" onclick="confirmWipeData()">OBLITERATE</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- World Book -->
             <div id="app-world" class="app-view">
                 <div class="app-header">
@@ -665,7 +681,21 @@
                     </div>
                     <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">
                         <button class="goth-btn" onclick="saveGlobalSettings()">Save System Settings</button>
-                        <button class="goth-btn btn-export" onclick="exportAllData()" style="border-color: var(--blood-red); color: var(--blood-red);"><i class="fas fa-download"></i> Extract Soul Core</button>
+                        
+                        <button class="goth-btn btn-export" onclick="exportAllData()" style="border-color: var(--blood-red); color: var(--blood-red);">
+                            <i class="fas fa-download"></i> Extract Soul Core
+                        </button>
+
+                        <!-- NEW: Import Button -->
+                        <button class="goth-btn btn-export" onclick="document.getElementById('import-file').click()">
+                            <i class="fas fa-file-import"></i> Import Soul Core
+                        </button>
+                        <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(this)">
+
+                        <!-- NEW: Wipe All Data -->
+                        <button class="goth-btn btn-delete" style="margin-top: 30px;" onclick="askWipeData()">
+                            <i class="fas fa-skull"></i> OBLITERATE ALL DATA
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1431,6 +1461,49 @@
             document.body.classList.remove('full-screen-mode'); // Exclusive
         }
         function escapeHtml(text) { if(!text) return ''; return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+        // --- NEW FUNCTIONS FOR DATA MANAGEMENT ---
+
+        function handleImport(input) {
+            const file = input.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    // Validation: Check for key fields
+                    if(!data.contacts && !data.globalSettings) throw new Error("Invalid Soul Core file.");
+
+                    if(confirm("Overwrite current reality with this backup?")) {
+                        if(data.contacts) localStorage.setItem('gothic_contacts', JSON.stringify(data.contacts));
+                        if(data.worldBook) localStorage.setItem('gothic_worldbook', JSON.stringify(data.worldBook));
+                        if(data.homePrefs) localStorage.setItem('gothic_home_prefs', JSON.stringify(data.homePrefs));
+                        
+                        if(data.globalSettings) {
+                            if(data.globalSettings.apiUrl) localStorage.setItem('gothic_api_url', data.globalSettings.apiUrl);
+                            if(data.globalSettings.globalCss) localStorage.setItem('gothic_global_css', data.globalSettings.globalCss);
+                        }
+                        
+                        alert("Reality rewritten. System restarting...");
+                        location.reload();
+                    }
+                } catch(err) {
+                    alert("Import failed: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+            input.value = ''; // Reset
+        }
+
+        function askWipeData() {
+            document.getElementById('modal-wipe-all').style.display = 'flex';
+        }
+
+        function confirmWipeData() {
+            localStorage.clear();
+            location.reload();
+        }
+
     </script>
 </body>
 </html>

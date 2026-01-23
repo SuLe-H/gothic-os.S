@@ -792,6 +792,14 @@
             if(fUrl) document.getElementById('global-font-url').value = fUrl;
             if(fFam) document.getElementById('global-font-family').value = fFam;
             applyFontSettings(fUrl, fFam);
+
+            // --- LOAD DISPLAY MODE ---
+            const savedMode = localStorage.getItem('gothic_display_mode');
+            if (savedMode === 'fullscreen') {
+                document.body.classList.add('full-screen-mode');
+            } else if (savedMode === 'noframe') {
+                document.body.classList.add('no-frame-mode');
+            }
         }
         function saveData() { localStorage.setItem('gothic_contacts', JSON.stringify(contacts)); localStorage.setItem('gothic_worldbook', JSON.stringify(worldBook)); }
         function saveHomePrefs() { localStorage.setItem('gothic_home_prefs', JSON.stringify(homePrefs)); }
@@ -1452,14 +1460,31 @@
             const widget = document.getElementById('home-widget-clock');
             if(widget) widget.innerText = timeStr;
         }
+
+        // --- UPDATED TOGGLE FUNCTIONS WITH PERSISTENCE ---
+
         function toggleFullScreenMode() {
-            document.body.classList.toggle('full-screen-mode');
             document.body.classList.remove('no-frame-mode'); // Exclusive
+            if (document.body.classList.contains('full-screen-mode')) {
+                document.body.classList.remove('full-screen-mode');
+                localStorage.setItem('gothic_display_mode', 'default');
+            } else {
+                document.body.classList.add('full-screen-mode');
+                localStorage.setItem('gothic_display_mode', 'fullscreen');
+            }
         }
+
         function toggleNoFrameMode() {
-            document.body.classList.toggle('no-frame-mode');
             document.body.classList.remove('full-screen-mode'); // Exclusive
+            if (document.body.classList.contains('no-frame-mode')) {
+                document.body.classList.remove('no-frame-mode');
+                localStorage.setItem('gothic_display_mode', 'default');
+            } else {
+                document.body.classList.add('no-frame-mode');
+                localStorage.setItem('gothic_display_mode', 'noframe');
+            }
         }
+
         function escapeHtml(text) { if(!text) return ''; return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
         // --- NEW FUNCTIONS FOR DATA MANAGEMENT ---

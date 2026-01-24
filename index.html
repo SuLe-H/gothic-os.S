@@ -185,6 +185,13 @@
             color: var(--primary-gold); padding: 8px; border-radius: 4px;
             font-family: 'MedievalSharp', cursive; box-sizing: border-box; width: 100%;
         }
+        
+        /* FIX: CSS Hack to make text input look like password input */
+        .masked-input {
+            -webkit-text-security: disc;
+            text-security: disc;
+        }
+
         .goth-btn {
             background: var(--blood-red); color: #000; border: none; padding: 8px 15px;
             cursor: pointer; font-family: 'MedievalSharp', cursive; font-weight: bold;
@@ -397,8 +404,8 @@
                             <i class="fas fa-times" style="cursor:pointer; color:#888;" onclick="cancelQuote()"></i>
                         </div>
                         <div class="input-row">
-                            <!-- FIX: Added autocomplete="off" and specific name to prevent password managers -->
-                            <input type="text" id="msg-input" name="chat-message-no-autofill" class="goth-input" placeholder="Whisper... (Empty to receive)" autocomplete="off">
+                            <!-- FIX: Random name, autocomplete off, aria properties to stop autofill -->
+                            <input type="text" id="msg-input" name="chat_input_random_8823" class="goth-input" placeholder="Whisper... (Empty to receive)" autocomplete="off" aria-autocomplete="none">
                             <button class="goth-btn" style="margin-left:5px;" onclick="sendChatMessage()">Send</button>
                         </div>
                     </div>
@@ -552,8 +559,8 @@
                     </div>
                     <div class="setting-group" style="margin-top: 15px;">
                         <label class="form-label" style="font-size: 14px; color: var(--primary-gold);">API Key</label>
-                        <!-- FIX: Added autocomplete="off" to prevent password manager saving this -->
-                        <input type="password" id="global-api-key" class="goth-input" placeholder="sk-..." autocomplete="off">
+                        <!-- FIX: Changed type="password" to type="text" with masking class to stop browser password manager -->
+                        <input type="text" id="global-api-key" class="goth-input masked-input" placeholder="sk-..." autocomplete="off" spellcheck="false">
                     </div>
                     <div class="setting-group" style="margin-top: 15px; display:flex; align-items:flex-end; gap:10px;">
                         <div style="flex:1;">
@@ -1037,7 +1044,8 @@
             const apiKey = localStorage.getItem('gothic_api_key');
             const apiModel = localStorage.getItem('gothic_api_model') || "gpt-3.5-turbo";
             if (!apiUrl || !apiKey) throw new Error("Pact Unsealed.");
-            let systemPrompt = `[System: You MUST reply in Simplified Chinese (简体中文).]\nYou are ${contact.name}.\nPersona: ${contact.persona}\n`;
+            // FIX: Added specific instruction about not knowing other contacts
+            let systemPrompt = `[System: You MUST reply in Simplified Chinese (简体中文).]\nYou are ${contact.name}.\nPersona: ${contact.persona}\nNote: You are an independent entity. You do not know other contacts in this device unless mentioned in World Info.\n`;
             if(contact.userName) systemPrompt += `User Name: ${contact.userName}\nUser Persona: ${contact.userPersona}\n`;
             let requestedTokens = 500; 
             if (contact.offlineMode) {

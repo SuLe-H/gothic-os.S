@@ -1302,7 +1302,8 @@
             if(contact.userName) systemPrompt += `User Name: ${contact.userName}\nUser Persona: ${contact.userPersona}\n`;
             
             // --- INJECT STICKER KNOWLEDGE (Append only, do not change original prompt core) ---
-            if(stickerLibrary.length > 0) {
+            // FIX: ONLY INJECT IF NOT OFFLINE MODE
+            if(stickerLibrary.length > 0 && !contact.offlineMode) {
                 systemPrompt += `\n[SYSTEM: IMAGES/STICKERS CAPABILITY ENABLED]\n`;
                 systemPrompt += `You can send stickers from your collection. To send a sticker, output strictly: [STICKER: Name]\n`;
                 systemPrompt += `Available Stickers (Name: Description):\n`;

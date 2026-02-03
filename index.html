@@ -685,6 +685,9 @@
         let homePrefs = { avatar: null, signature: "我无限的爱着新的一日", background: null };
         
         let pressTimer;
+        let stickerPressTimer;
+        let isStickerLongPress = false;
+
         let selectedMessageId = null;
         let quoteMessageId = null;
         let isSelectionMode = false;
@@ -1142,7 +1145,19 @@
             stickerLibrary.forEach(s => {
                 const div = document.createElement('div');
                 div.className = 'sticker-item';
-                div.onclick = () => sendStickerMessage(s);
+                
+                // --- NEW DELETE LOGIC START ---
+                div.onmousedown = () => startStickerPress(s);
+                div.ontouchstart = () => startStickerPress(s);
+                div.onmouseup = cancelStickerPress;
+                div.ontouchend = cancelStickerPress;
+                div.onmouseleave = cancelStickerPress;
+                // --- NEW DELETE LOGIC END ---
+
+                div.onclick = () => {
+                    if(!isStickerLongPress) sendStickerMessage(s);
+                    isStickerLongPress = false; // Reset
+                };
                 div.innerHTML = `<img src="${s.url}" class="sticker-img" title="${s.name}">`;
                 container.appendChild(div);
             });
@@ -1152,6 +1167,22 @@
             addBtn.innerText = '+';
             addBtn.onclick = openAddStickerModal;
             container.appendChild(addBtn);
+        }
+
+        function startStickerPress(sticker) {
+            isStickerLongPress = false;
+            stickerPressTimer = setTimeout(() => {
+                isStickerLongPress = true;
+                if(confirm(`Delete sticker "${sticker.name}"?`)) {
+                    stickerLibrary = stickerLibrary.filter(x => x.id !== sticker.id);
+                    saveData();
+                    renderStickerGrid();
+                }
+            }, 800); 
+        }
+
+        function cancelStickerPress() {
+            clearTimeout(stickerPressTimer);
         }
 
         function sendStickerMessage(sticker) {
@@ -1204,8 +1235,15 @@
             fetchAiResponse(contact).then(async responseContent => {
                 const temp = document.getElementById('temp-loading'); if(temp) temp.remove();
                 
-                // Parse AI response for Stickers
-                let parts = responseContent.includes('|||') ? responseContent.split('|||').map(p => p.trim()).filter(p => p.length > 0) : [responseContent];
+                let parts;
+                if (contact.offlineMode) {
+                     // --- FORCE SINGLE BUBBLE FOR OFFLINE MODE ---
+                     // Even if AI outputs ||| separator, ignore it and keep as one block.
+                     parts = [responseContent]; 
+                } else {
+                     // Online mode logic: Split by |||
+                     parts = responseContent.includes('|||') ? responseContent.split('|||').map(p => p.trim()).filter(p => p.length > 0) : [responseContent];
+                }
                 
                 for (let i = 0; i < parts.length; i++) {
                     let content = parts[i];
@@ -1279,8 +1317,8 @@
                 // Ensure we read the freshest value directly from the object
                 let targetWords = contact.targetLength || 500;
                 systemPrompt += `\n[MODE: OFFLINE / NOVEL ROLEPLAY]\n1. Output a SINGLE, CONTINUOUS narrative block.\n2. Enclose dialogue in double quotes.\n3. Length: ~${targetWords} words.\n4. Complete scene.\n5. Third Person perspective for ${contact.name}, Second Person for User.\n`;
-                // FIX: REMOVED THE 4000 CAP TO PREVENT TRUNCATION ON LONG REQUESTS
-                requestedTokens = Math.ceil(targetWords * 3) + 500; 
+                // FIX: INCREASED MULTIPLIER TO 4 TO ENSURE NO TRUNCATION
+                requestedTokens = Math.ceil(targetWords * 4) + 500; 
             } else {
                 systemPrompt += `\n[MODE: ONLINE / SMS]\n1. Multiple short messages separated by '|||'.\n2. Tone: Casual.\n`;
                 requestedTokens = 800;

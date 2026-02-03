@@ -511,7 +511,7 @@
                     <div class="form-row"><span class="form-label">User Name</span><input type="text" id="setting-user-name" class="goth-input" placeholder="Your Name..." autocomplete="off"></div>
                     <div class="form-row"><span class="form-label">User Persona</span><textarea id="setting-user-persona" class="goth-textarea" style="height: 50px;" placeholder="Your role..."></textarea></div>
                     <div class="switch-container"><span class="switch-label">Offline Mode</span><label class="switch"><input type="checkbox" id="setting-offline-mode" onchange="toggleOfflineInput()"><span class="slider"></span></label></div>
-                    <div id="offline-length-container" class="form-row" style="display: none; border-left: 2px solid var(--blood-red); padding-left: 10px;"><span class="form-label" style="color: var(--primary-gold);">Desired Output Length</span><input type="number" id="setting-target-length" class="goth-input" placeholder="e.g. 500" max="5000"></div>
+                    <div id="offline-length-container" class="form-row" style="display: none; border-left: 2px solid var(--blood-red); padding-left: 10px;"><span class="form-label" style="color: var(--primary-gold);">Desired Output Length (100-5000)</span><input type="number" id="setting-target-length" class="goth-input" placeholder="e.g. 500" min="100" max="5000"></div>
                     <div class="form-row"><span class="form-label">Bubble CSS</span><textarea id="setting-bubble-css" class="goth-textarea" style="height: 50px; font-size: 10px; font-family: monospace;" placeholder=".msg-bubble { ... }"></textarea></div>
                     <div class="modal-actions">
                         <button class="goth-btn btn-export" onclick="exportCurrentChat()"><i class="fas fa-file-export"></i></button>
@@ -1279,7 +1279,8 @@
                 // Ensure we read the freshest value directly from the object
                 let targetWords = contact.targetLength || 500;
                 systemPrompt += `\n[MODE: OFFLINE / NOVEL ROLEPLAY]\n1. Output a SINGLE, CONTINUOUS narrative block.\n2. Enclose dialogue in double quotes.\n3. Length: ~${targetWords} words.\n4. Complete scene.\n5. Third Person perspective for ${contact.name}, Second Person for User.\n`;
-                requestedTokens = Math.min(Math.ceil(targetWords * 3) + 500, 4000); 
+                // FIX: REMOVED THE 4000 CAP TO PREVENT TRUNCATION ON LONG REQUESTS
+                requestedTokens = Math.ceil(targetWords * 3) + 500; 
             } else {
                 systemPrompt += `\n[MODE: ONLINE / SMS]\n1. Multiple short messages separated by '|||'.\n2. Tone: Casual.\n`;
                 requestedTokens = 800;
@@ -1340,9 +1341,19 @@
             if(tempImgData.user) contact.userAvatar = tempImgData.user;
             if(tempImgData.chatBg) contact.chatBackground = tempImgData.chatBg;
             contact.offlineMode = document.getElementById('setting-offline-mode').checked;
-            let len = parseInt(document.getElementById('setting-target-length').value);
-            if(isNaN(len)) len = 0; if(len > 5000) len = 5000;
-            contact.targetLength = parseInt(len); // Ensure strict integer storage
+            
+            // --- NEW LENGTH SAVE LOGIC ---
+            const rawLen = document.getElementById('setting-target-length').value;
+            if(rawLen === '') {
+                contact.targetLength = 0; // Means default
+            } else {
+                let len = parseInt(rawLen);
+                if(isNaN(len)) len = 0;
+                else if(len < 100) len = 100;
+                else if(len > 5000) len = 5000;
+                contact.targetLength = len;
+            }
+            
             document.getElementById('current-chat-style').innerHTML = contact.bubbleCss;
             saveData();
             if(document.getElementById('app-chat-conversation').classList.contains('active')) {

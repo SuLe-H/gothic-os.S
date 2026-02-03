@@ -280,7 +280,7 @@
         .chat-row.selected .select-checkbox::after { content: '✓'; color: #000; font-size: 14px; }
         .msg-error { color: #ff5555; font-family: monospace; border: 1px dashed #ff5555; background: rgba(50, 0, 0, 0.8) !important; }
 
-        /* Stickers CSS */
+        /* Sticker Styles */
         .sticker-toggle-btn {
             background: none; border: none; color: #666; font-size: 20px; cursor: pointer; 
             margin-right: 8px; width: 30px; display: flex; justify-content: center; align-items: center;
@@ -1171,7 +1171,8 @@
             cancelQuote();
             toggleStickerPanel(); // Close panel after send
             renderMessages(contact);
-            requestAiReply(contact);
+            // NOTE: Per user instruction, do NOT call requestAiReply here.
+            // User must click "Send" again to trigger the reply logic.
         }
 
         function sendChatMessage() {
@@ -1183,8 +1184,12 @@
                 const newMsg = { id: uuidv4(), role: 'user', content: text, quoteId: quoteMessageId };
                 contact.messages.push(newMsg); 
                 saveData(); cancelQuote(); input.value = ''; renderMessages(contact); 
-                requestAiReply(contact);
+                // Original logic: If user sends text, we return.
+                // The user must click Send again (empty input) to get a reply.
+                return; 
             }
+            // Logic: If input is empty, Trigger AI Reply
+            requestAiReply(contact);
         }
 
         function requestAiReply(contact) {
@@ -1258,7 +1263,7 @@
             let systemPrompt = `[System: You MUST reply in Simplified Chinese (简体中文).]\nYou are ${contact.name}.\nPersona: ${contact.persona}\nNote: You are an independent entity. You do not know other contacts in this device unless mentioned in World Info.\n`;
             if(contact.userName) systemPrompt += `User Name: ${contact.userName}\nUser Persona: ${contact.userPersona}\n`;
             
-            // --- INJECT STICKER KNOWLEDGE ---
+            // --- INJECT STICKER KNOWLEDGE (Append only, do not change original prompt core) ---
             if(stickerLibrary.length > 0) {
                 systemPrompt += `\n[SYSTEM: IMAGES/STICKERS CAPABILITY ENABLED]\n`;
                 systemPrompt += `You can send stickers from your collection. To send a sticker, output strictly: [STICKER: Name]\n`;

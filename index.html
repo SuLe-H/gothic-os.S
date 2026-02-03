@@ -244,12 +244,12 @@
         /* FIX: Removed padding-bottom to eliminate the black bar gap above keyboard */
         .chat-input-area { 
             display: flex; flex-direction: column; border-top: 1px solid #333; background: #0a0202; flex-shrink: 0; 
-            padding-bottom: 0px; 
+            padding-bottom: 0px; z-index: 50;
         }
         
         .input-toolbar { display: none; align-items: center; justify-content: space-between; padding: 5px 10px; background: #1a0505; border-bottom: 1px solid #333; font-size: 12px; color: #aaa; }
         .quote-preview-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 85%; font-style: italic; color: var(--primary-gold); }
-        .input-row { display: flex; padding: 10px; }
+        .input-row { display: flex; padding: 10px; align-items: center; }
 
         /* Multi-select */
         #multi-select-bar { display: none; padding: 10px; background: #111; border-top: 2px solid var(--blood-red); justify-content: space-between; align-items: center; }
@@ -279,6 +279,42 @@
         .chat-row.selected .select-checkbox { background: var(--blood-red); }
         .chat-row.selected .select-checkbox::after { content: '✓'; color: #000; font-size: 14px; }
         .msg-error { color: #ff5555; font-family: monospace; border: 1px dashed #ff5555; background: rgba(50, 0, 0, 0.8) !important; }
+
+        /* Stickers CSS */
+        .sticker-toggle-btn {
+            background: none; border: none; color: #666; font-size: 20px; cursor: pointer; 
+            margin-right: 8px; width: 30px; display: flex; justify-content: center; align-items: center;
+        }
+        .sticker-toggle-btn:hover, .sticker-toggle-btn.active { color: var(--primary-gold); }
+        
+        .sticker-panel {
+            display: none; height: 160px; background: #0e0202; border-top: 1px solid #333;
+            flex-direction: column; overflow: hidden; animation: slideUp 0.2s ease-out;
+        }
+        .sticker-panel.active { display: flex; }
+        
+        .sticker-grid {
+            flex: 1; overflow-y: auto; padding: 10px; display: grid; 
+            grid-template-columns: repeat(4, 1fr); gap: 10px;
+        }
+        
+        .sticker-item {
+            aspect-ratio: 1; border: 1px solid #333; border-radius: 6px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; background: rgba(255,255,255,0.05); position: relative;
+        }
+        .sticker-item:hover { border-color: var(--primary-gold); background: rgba(197, 160, 89, 0.1); }
+        .sticker-img { width: 100%; height: 100%; object-fit: contain; padding: 2px; box-sizing: border-box; }
+        
+        .sticker-add-btn {
+            border: 1px dashed #666; color: #666; font-size: 24px; display: flex; justify-content: center; align-items: center;
+        }
+        .sticker-add-btn:hover { color: var(--primary-gold); border-color: var(--primary-gold); }
+        
+        .msg-sticker-img {
+            max-width: 120px; max-height: 120px; border-radius: 8px; display: block;
+            margin-top: 5px; cursor: pointer;
+        }
 
         /* Context Menu */
         .context-menu-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; align-items: flex-end; }
@@ -399,6 +435,15 @@
                 </div>
                 <div class="chat-view-container">
                     <div class="chat-history" id="message-container"></div>
+                    
+                    <!-- NEW: STICKER PANEL -->
+                    <div id="sticker-picker-panel" class="sticker-panel">
+                        <div class="sticker-grid" id="sticker-list-container">
+                            <!-- Stickers injected here -->
+                            <div class="sticker-item sticker-add-btn" onclick="openAddStickerModal()">+</div>
+                        </div>
+                    </div>
+
                     <div id="multi-select-bar">
                         <button class="goth-btn btn-cancel" onclick="exitSelectionMode()">Cancel</button>
                         <span style="color:#666; font-size:12px;">Select Messages</span>
@@ -410,6 +455,9 @@
                             <i class="fas fa-times" style="cursor:pointer; color:#888;" onclick="cancelQuote()"></i>
                         </div>
                         <div class="input-row">
+                            <!-- NEW: STICKER TOGGLE BUTTON -->
+                            <button id="sticker-toggle" class="sticker-toggle-btn" onclick="toggleStickerPanel()"><i class="far fa-smile"></i></button>
+                            
                             <!-- FIX: Random name, autocomplete off, aria properties to stop autofill -->
                             <input type="text" id="msg-input" name="chat_input_random_8823" class="goth-input" placeholder="Whisper... (Empty to receive)" autocomplete="off" aria-autocomplete="none">
                             <button class="goth-btn" style="margin-left:5px;" onclick="sendChatMessage()">Send</button>
@@ -471,6 +519,33 @@
                     </div>
                     <button class="goth-btn btn-delete" onclick="askDeleteContact()"><i class="fas fa-skull"></i> Delete Soul</button>
                     <button class="goth-btn btn-cancel" style="width:100%; margin-top:10px;" onclick="closeModal('modal-chat-settings')">Cancel</button>
+                </div>
+            </div>
+
+            <!-- NEW: ADD STICKER MODAL -->
+            <div id="modal-add-sticker" class="modal-overlay">
+                <div class="modal-box">
+                    <h3 class="modal-title">Forge Sticker</h3>
+                    <div class="form-row">
+                        <span class="form-label">Sticker Image (Upload or URL)</span>
+                        <div class="upload-container">
+                            <img id="new-sticker-preview" class="avatar-preview" style="border-radius: 4px; object-fit: contain;" onclick="document.getElementById('new-sticker-file').click()">
+                            <input type="file" id="new-sticker-file" accept="image/*" style="display:none" onchange="handleImageUpload(this, 'new-sticker-preview', 300)">
+                        </div>
+                        <input type="text" id="new-sticker-url" class="goth-input" placeholder="Or paste Image URL..." onchange="document.getElementById('new-sticker-preview').src = this.value">
+                    </div>
+                    <div class="form-row">
+                        <span class="form-label">Sticker Name (Unique)</span>
+                        <input type="text" id="new-sticker-name" class="goth-input" placeholder="e.g. Laughing" autocomplete="off">
+                    </div>
+                    <div class="form-row">
+                        <span class="form-label">Description (For AI)</span>
+                        <textarea id="new-sticker-desc" class="goth-textarea" style="height: 60px;" placeholder="Describe it so the AI can see it..."></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="goth-btn btn-cancel" onclick="closeModal('modal-add-sticker')">Cancel</button>
+                        <button class="goth-btn btn-confirm" onclick="saveNewSticker()">Forge</button>
+                    </div>
                 </div>
             </div>
 
@@ -603,9 +678,10 @@
     <script>
         let contacts = []; 
         let worldBook = [];
+        let stickerLibrary = [];
         let currentChatId = null;
         let wbEditIndex = -1;
-        let tempImgData = { char: null, user: null, newChar: null, chatBg: null, homeBg: null };
+        let tempImgData = { char: null, user: null, newChar: null, chatBg: null, homeBg: null, newSticker: null };
         let homePrefs = { avatar: null, signature: "我无限的爱着新的一日", background: null };
         
         let pressTimer;
@@ -646,6 +722,7 @@
                 });
             } catch(e) { contacts = []; }
             try { const wData = localStorage.getItem('gothic_worldbook'); if(wData) worldBook = JSON.parse(wData); } catch(e) { worldBook = []; }
+            try { const sData = localStorage.getItem('gothic_stickers'); if(sData) stickerLibrary = JSON.parse(sData); } catch(e) { stickerLibrary = []; }
             
             // Load Home Prefs
             try { 
@@ -701,7 +778,11 @@
                 document.body.classList.add('no-frame-mode');
             }
         }
-        function saveData() { localStorage.setItem('gothic_contacts', JSON.stringify(contacts)); localStorage.setItem('gothic_worldbook', JSON.stringify(worldBook)); }
+        function saveData() { 
+            localStorage.setItem('gothic_contacts', JSON.stringify(contacts)); 
+            localStorage.setItem('gothic_worldbook', JSON.stringify(worldBook)); 
+            localStorage.setItem('gothic_stickers', JSON.stringify(stickerLibrary));
+        }
         function saveHomePrefs() { localStorage.setItem('gothic_home_prefs', JSON.stringify(homePrefs)); }
 
         function applyFontSettings(url, family) {
@@ -758,6 +839,7 @@
                         if(previewId === 'setting-char-preview') tempImgData.char = dataUrl;
                         if(previewId === 'setting-user-preview') tempImgData.user = dataUrl;
                         if(previewId === 'setting-bg-preview') tempImgData.chatBg = dataUrl;
+                        if(previewId === 'new-sticker-preview') tempImgData.newSticker = dataUrl;
                         if(previewId === 'setting-home-bg-preview') { 
                             tempImgData.homeBg = dataUrl; 
                             document.getElementById('setting-home-bg-preview').style.backgroundImage = `url(${dataUrl})`;
@@ -842,6 +924,8 @@
             document.getElementById('app-chat-conversation').style.backgroundImage = '';
             exitSelectionMode();
             cancelQuote();
+            document.getElementById('sticker-picker-panel').classList.remove('active');
+            document.getElementById('sticker-toggle').classList.remove('active');
             currentChatId = null;
         }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
@@ -874,6 +958,7 @@
                 if(c.messages.length > 0) {
                     const last = c.messages[c.messages.length - 1];
                     lastMsg = last.content;
+                    if(last.stickerUrl) lastMsg = "[Sticker]";
                     if(last.isRecalled) lastMsg = last.role === 'user' ? "You recalled a message" : "Entity recalled a message";
                 }
                 let avatarHtml = `<div class="contact-avatar-img" style="display:flex;justify-content:center;align-items:center;font-size:18px;color:#666;">${c.name[0]}</div>`;
@@ -901,6 +986,8 @@
             document.getElementById('app-chat').classList.add('active');
             exitSelectionMode();
             cancelQuote();
+            document.getElementById('sticker-picker-panel').classList.remove('active');
+            document.getElementById('sticker-toggle').classList.remove('active');
             renderContactList();
         }
 
@@ -937,17 +1024,33 @@
                         const originalMsg = contact.messages.find(m => m.id === msg.quoteId);
                         if (originalMsg) {
                             let qText = originalMsg.isRecalled ? "Message recalled" : originalMsg.content;
+                            if(originalMsg.stickerUrl) qText = "[Sticker]";
                             if(qText.length > 50) qText = qText.substring(0, 50) + "...";
                             const qUser = originalMsg.role === 'user' ? "You" : contact.name;
                             contentHtml += `<div class="quote-block"><b>${qUser}:</b> ${escapeHtml(qText)}</div>`;
                         }
                     }
-                    contentHtml += escapeHtml(msg.content);
+
+                    // CHECK FOR STICKER
+                    if(msg.stickerUrl) {
+                        contentHtml += `<img src="${msg.stickerUrl}" class="msg-sticker-img" onclick="alert('${escapeHtml(msg.stickerName || 'Sticker')}')">`;
+                    } else {
+                        contentHtml += escapeHtml(msg.content);
+                    }
                 }
 
                 const bubble = document.createElement('div');
                 bubble.className = bubbleClass;
                 bubble.innerHTML = contentHtml;
+                
+                // Clear background for sticker bubbles so image shows cleanly
+                if(msg.stickerUrl && !msg.isRecalled) {
+                    bubble.style.background = 'transparent';
+                    bubble.style.boxShadow = 'none';
+                    bubble.style.border = 'none';
+                    bubble.style.padding = '0';
+                    bubble.style.backdropFilter = 'none';
+                }
 
                 if(!isSelectionMode) {
                     bubble.addEventListener('mousedown', () => startPress(msg.id));
@@ -980,21 +1083,96 @@
             const msg = contact.messages[msgIndex];
 
             switch(action) {
-                case 'copy': if(!msg.isRecalled) { navigator.clipboard.writeText(msg.content); alert("Copied"); } break;
+                case 'copy': if(!msg.isRecalled && !msg.stickerUrl) { navigator.clipboard.writeText(msg.content); alert("Copied"); } break;
                 case 'quote': if(!msg.isRecalled) setQuote(msg); break;
                 case 'delete': if(confirm("Delete this message?")) { contact.messages.splice(msgIndex, 1); saveData(); renderMessages(contact); } break;
-                case 'recall': if(!msg.isRecalled) { msg.isRecalled = true; msg.recalledContent = msg.content; saveData(); renderMessages(contact); } break;
+                case 'recall': if(!msg.isRecalled) { msg.isRecalled = true; msg.recalledContent = msg.stickerUrl ? '[Sticker]' : msg.content; saveData(); renderMessages(contact); } break;
                 case 'multi': enterSelectionMode(); toggleSelectMessage(selectedMessageId); break;
             }
             closeContextMenu();
         }
 
-        function setQuote(msg) { quoteMessageId = msg.id; const bar = document.getElementById('quote-preview-bar'); const txt = document.getElementById('quote-preview-content'); let content = msg.content; if(content.length > 30) content = content.substring(0, 30) + "..."; txt.innerText = `Replying to: "${content}"`; bar.style.display = 'flex'; }
+        function setQuote(msg) { quoteMessageId = msg.id; const bar = document.getElementById('quote-preview-bar'); const txt = document.getElementById('quote-preview-content'); let content = msg.content; if(msg.stickerUrl) content = "[Sticker]"; if(content.length > 30) content = content.substring(0, 30) + "..."; txt.innerText = `Replying to: "${content}"`; bar.style.display = 'flex'; }
         function cancelQuote() { quoteMessageId = null; document.getElementById('quote-preview-bar').style.display = 'none'; }
-        function enterSelectionMode() { isSelectionMode = true; selectedMessages.clear(); document.getElementById('multi-select-bar').style.display = 'flex'; document.getElementById('chat-input-wrapper').style.display = 'none'; const contact = contacts.find(c => c.id === currentChatId); renderMessages(contact); }
+        function enterSelectionMode() { isSelectionMode = true; selectedMessages.clear(); document.getElementById('multi-select-bar').style.display = 'flex'; document.getElementById('chat-input-wrapper').style.display = 'none'; document.getElementById('sticker-picker-panel').classList.remove('active'); const contact = contacts.find(c => c.id === currentChatId); renderMessages(contact); }
         function exitSelectionMode() { isSelectionMode = false; selectedMessages.clear(); document.getElementById('multi-select-bar').style.display = 'none'; document.getElementById('chat-input-wrapper').style.display = 'flex'; const contact = contacts.find(c => c.id === currentChatId); if(contact) renderMessages(contact); }
         function toggleSelectMessage(id) { if(selectedMessages.has(id)) selectedMessages.delete(id); else selectedMessages.add(id); const contact = contacts.find(c => c.id === currentChatId); renderMessages(contact); }
         function deleteSelectedMessages() { if(selectedMessages.size === 0) return; if(confirm(`Delete ${selectedMessages.size} messages?`)) { const contact = contacts.find(c => c.id === currentChatId); contact.messages = contact.messages.filter(m => !selectedMessages.has(m.id)); saveData(); exitSelectionMode(); } }
+
+        /* --- STICKER LOGIC --- */
+        function toggleStickerPanel() {
+            const panel = document.getElementById('sticker-picker-panel');
+            const btn = document.getElementById('sticker-toggle');
+            panel.classList.toggle('active');
+            btn.classList.toggle('active');
+            if(panel.classList.contains('active')) {
+                renderStickerGrid();
+            }
+        }
+        
+        function openAddStickerModal() {
+            document.getElementById('new-sticker-name').value = '';
+            document.getElementById('new-sticker-desc').value = '';
+            document.getElementById('new-sticker-url').value = '';
+            document.getElementById('new-sticker-preview').src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23333"><rect width="24" height="24" fill="none"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23666" font-size="20">+</text></svg>';
+            tempImgData.newSticker = null;
+            document.getElementById('modal-add-sticker').style.display = 'flex';
+        }
+
+        function saveNewSticker() {
+            const name = document.getElementById('new-sticker-name').value.trim();
+            const desc = document.getElementById('new-sticker-desc').value.trim();
+            const urlInput = document.getElementById('new-sticker-url').value.trim();
+            
+            const finalUrl = tempImgData.newSticker || urlInput;
+            
+            if(!name || !desc || !finalUrl) { alert("All fields required."); return; }
+            if(stickerLibrary.some(s => s.name === name)) { alert("Sticker name exists."); return; }
+
+            stickerLibrary.push({ id: uuidv4(), name: name, description: desc, url: finalUrl });
+            saveData();
+            closeModal('modal-add-sticker');
+            renderStickerGrid();
+        }
+
+        function renderStickerGrid() {
+            const container = document.getElementById('sticker-list-container');
+            // Keep the Add button at the end, so clear all but the last child or rebuild
+            container.innerHTML = '';
+            stickerLibrary.forEach(s => {
+                const div = document.createElement('div');
+                div.className = 'sticker-item';
+                div.onclick = () => sendStickerMessage(s);
+                div.innerHTML = `<img src="${s.url}" class="sticker-img" title="${s.name}">`;
+                container.appendChild(div);
+            });
+            // Append Add Button
+            const addBtn = document.createElement('div');
+            addBtn.className = 'sticker-item sticker-add-btn';
+            addBtn.innerText = '+';
+            addBtn.onclick = openAddStickerModal;
+            container.appendChild(addBtn);
+        }
+
+        function sendStickerMessage(sticker) {
+            if(!currentChatId) return;
+            const contact = contacts.find(c => c.id === currentChatId);
+            const newMsg = { 
+                id: uuidv4(), 
+                role: 'user', 
+                content: `[STICKER: ${sticker.name}]`, // Fallback text
+                stickerUrl: sticker.url,
+                stickerName: sticker.name,
+                stickerDesc: sticker.description,
+                quoteId: quoteMessageId 
+            };
+            contact.messages.push(newMsg);
+            saveData();
+            cancelQuote();
+            toggleStickerPanel(); // Close panel after send
+            renderMessages(contact);
+            requestAiReply(contact);
+        }
 
         function sendChatMessage() {
             if(!currentChatId) return;
@@ -1005,9 +1183,8 @@
                 const newMsg = { id: uuidv4(), role: 'user', content: text, quoteId: quoteMessageId };
                 contact.messages.push(newMsg); 
                 saveData(); cancelQuote(); input.value = ''; renderMessages(contact); 
-                return; 
+                requestAiReply(contact);
             }
-            requestAiReply(contact);
         }
 
         function requestAiReply(contact) {
@@ -1021,9 +1198,36 @@
             
             fetchAiResponse(contact).then(async responseContent => {
                 const temp = document.getElementById('temp-loading'); if(temp) temp.remove();
+                
+                // Parse AI response for Stickers
                 let parts = responseContent.includes('|||') ? responseContent.split('|||').map(p => p.trim()).filter(p => p.length > 0) : [responseContent];
+                
                 for (let i = 0; i < parts.length; i++) {
-                    contact.messages.push({ id: uuidv4(), role: 'assistant', content: parts[i] });
+                    let content = parts[i];
+                    let stickerData = null;
+
+                    // Check for [STICKER: Name] pattern
+                    const stickerMatch = content.match(/\[STICKER:\s*(.*?)\]/);
+                    if(stickerMatch && stickerMatch[1]) {
+                        const sName = stickerMatch[1].trim();
+                        const foundSticker = stickerLibrary.find(s => s.name === sName);
+                        if(foundSticker) {
+                            stickerData = {
+                                url: foundSticker.url,
+                                name: foundSticker.name,
+                                desc: foundSticker.description
+                            };
+                            content = `[STICKER: ${sName}]`; // Normalize content
+                        }
+                    }
+
+                    const newMsg = { id: uuidv4(), role: 'assistant', content: content };
+                    if(stickerData) {
+                        newMsg.stickerUrl = stickerData.url;
+                        newMsg.stickerName = stickerData.name;
+                    }
+
+                    contact.messages.push(newMsg);
                     saveData();
                     if(document.getElementById('app-chat-conversation').classList.contains('active')) { renderMessages(contact); }
                     if (i < parts.length - 1) {
@@ -1053,6 +1257,18 @@
             // FIX: Added specific instruction about not knowing other contacts
             let systemPrompt = `[System: You MUST reply in Simplified Chinese (简体中文).]\nYou are ${contact.name}.\nPersona: ${contact.persona}\nNote: You are an independent entity. You do not know other contacts in this device unless mentioned in World Info.\n`;
             if(contact.userName) systemPrompt += `User Name: ${contact.userName}\nUser Persona: ${contact.userPersona}\n`;
+            
+            // --- INJECT STICKER KNOWLEDGE ---
+            if(stickerLibrary.length > 0) {
+                systemPrompt += `\n[SYSTEM: IMAGES/STICKERS CAPABILITY ENABLED]\n`;
+                systemPrompt += `You can send stickers from your collection. To send a sticker, output strictly: [STICKER: Name]\n`;
+                systemPrompt += `Available Stickers (Name: Description):\n`;
+                stickerLibrary.forEach(s => {
+                    systemPrompt += `- ${s.name}: ${s.description}\n`;
+                });
+                systemPrompt += `(Do not output image URLs directly, only the [STICKER: Name] tag)\n`;
+            }
+
             let requestedTokens = 500; 
             if (contact.offlineMode) {
                 let targetWords = contact.targetLength || 500;
@@ -1071,6 +1287,14 @@
             if(!hasLore) systemPrompt += "None.\n";
             const contextMessages = contact.messages.filter(m => !m.content.includes("[CONNECTION SEVERED]") && !m.isRecalled).slice(-10).map(m => {
                 let text = m.content;
+                // TRANSLATE STICKER FOR AI CONTEXT
+                if(m.stickerUrl && m.stickerDesc) {
+                    const sender = m.role === 'user' ? "User" : contact.name;
+                    text = `[${sender} sent a sticker named "${m.stickerName}" depicting: ${m.stickerDesc}]`;
+                } else if (m.stickerUrl) {
+                    text = `[Sent a sticker: ${m.stickerName}]`;
+                }
+
                 if(m.quoteId) { const original = contact.messages.find(om => om.id === m.quoteId); if(original && !original.isRecalled) text = `[Replying to: "${original.content}"]\n${text}`; }
                 return { role: m.role, content: text };
             });
@@ -1134,7 +1358,7 @@
             const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `whispers_${contact.name}.json`; a.click(); URL.revokeObjectURL(url);
         }
         function exportAllData() {
-            const backup = { date: new Date().toISOString(), contacts, worldBook, globalSettings: { apiUrl: localStorage.getItem('gothic_api_url'), globalCss: localStorage.getItem('gothic_global_css') }, homePrefs };
+            const backup = { date: new Date().toISOString(), contacts, worldBook, globalSettings: { apiUrl: localStorage.getItem('gothic_api_url'), globalCss: localStorage.getItem('gothic_global_css') }, homePrefs, stickerLibrary };
             const blob = new Blob([JSON.stringify(backup, null, 2)], {type : 'application/json'});
             const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `gothic_full_backup.json`; a.click(); URL.revokeObjectURL(url);
         }
@@ -1243,6 +1467,7 @@
                         if(data.contacts) localStorage.setItem('gothic_contacts', JSON.stringify(data.contacts));
                         if(data.worldBook) localStorage.setItem('gothic_worldbook', JSON.stringify(data.worldBook));
                         if(data.homePrefs) localStorage.setItem('gothic_home_prefs', JSON.stringify(data.homePrefs));
+                        if(data.stickerLibrary) localStorage.setItem('gothic_stickers', JSON.stringify(data.stickerLibrary));
                         if(data.globalSettings) {
                             if(data.globalSettings.apiUrl) localStorage.setItem('gothic_api_url', data.globalSettings.apiUrl);
                             if(data.globalSettings.globalCss) localStorage.setItem('gothic_global_css', data.globalSettings.globalCss);
